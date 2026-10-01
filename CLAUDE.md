@@ -14,8 +14,9 @@ the plan disagree, the plan wins; say so instead of guessing.
   Folder sync. Parts, models, plots, UI and attributes live in the place file,
   so build those through MCP (`execute_luau`, `insert_asset`) and save the place.
 - No Rojo. No Wally. ProfileStore is vendored in `ServerScriptService/Packages`.
-- Git tracks the scripts only. The place file is backed up by Studio version
-  history (File > Version History) and publishing.
+- Git tracks the scripts, `tools/` and the source models in `assets/models/`.
+  The place file is backed up by Studio version history (File > Version
+  History) and publishing.
 
 ## File layout (Script Sync naming)
 
@@ -64,6 +65,34 @@ Duplicate names in one folder can't sync.
 Studio's data stores: turn on Game Settings > Security > "Enable Studio
 Access to API Services" after the place is published, or ProfileStore runs
 in mock mode and nothing saves between tests.
+
+## Model pipeline (Blender to Studio)
+
+1. **Model** in Blender (Blender MCP) at real-world size in metres, origin at
+   the bottom centre. Roblox keeps one colour per MeshPart, so bake material
+   colours into a face-corner colour attribute (`BYTE_COLOR`, `CORNER`).
+2. **Export** the selected object to `assets/models/<name>.fbx` with
+   `bpy.ops.export_scene.fbx(filepath=..., use_selection=True,
+   object_types={"MESH"}, global_scale=0.018, colors_type="SRGB")`.
+   Roblox reads the FBX centimetre values as studs, so `global_scale` is
+   0.01 x studs per metre; 1.8 studs per metre is the half-scale world.
+   The Blender MCP `export_scene` tool can't set the scale: a default export
+   arrives 100 studs per metre.
+3. **Upload** with `tools/upload_model.sh assets/models/<name>.fbx "Display
+   Name"`. It posts to the Open Cloud Assets API as a Model owned by user
+   566042674, polls the operation and prints the asset ID on stdout. It needs
+   `curl`, `jq` and `$ROBLOX_API_KEY`; the key is set in the interactive zsh
+   profile, so from an agent shell run it as
+   `zsh -ic 'ROBLOX_API_KEY="$ROBLOX_API_KEY" tools/upload_model.sh ...'`.
+   Every run creates a new asset; it does not update an old one.
+4. **Insert** with Studio MCP `insert_asset` (`assetType` Model). Then through
+   `execute_luau`: anchor the parts, set the MeshPart `Color` to white (it
+   tints the vertex colours), and `PivotTo` so the bounding box sits on the
+   surface. `screen_capture` to check, then save the place.
+
+| Model | Source | Asset ID |
+|---|---|---|
+| Traffic cone | `assets/models/cone.fbx` | 120938429116640 |
 
 ## Current milestone
 
