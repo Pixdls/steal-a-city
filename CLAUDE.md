@@ -25,10 +25,13 @@ the plan disagree, the plan wins; say so instead of guessing.
 | `ServerScriptService/Services/*.luau` | one ModuleScript per system with `.Start()` |
 | `ServerScriptService/Packages/` | third-party modules, don't edit |
 | `ReplicatedStorage/Shared/*.luau` | modules both sides use (`Config`) |
-| `StarterPlayerScripts/*.client.luau` | client scripts |
+| `StarterPlayerScripts/*.local.luau` | client scripts (LocalScripts) |
 
-`name.luau` = ModuleScript, `name.server.luau` = Script, `name.client.luau` =
-client Script, `folder/init.server.luau` = script with children.
+`name.luau` = ModuleScript, `name.server.luau` = Script, `name.local.luau` =
+LocalScript, `name.client.luau` = Script with RunContext Client,
+`folder/init.server.luau` = script with children.
+Scripts in `StarterPlayerScripts` use `.local.luau`: a `.client.luau` Script
+there runs more than once.
 Duplicate names in one folder can't sync.
 
 ## Rules (from plan §9)
