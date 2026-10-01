@@ -1,0 +1,14 @@
+# Place files are large binaries; Studio version history backs them up
+*.rbxl
+*.rbxlx
+*.rbxl.lock
+*.rbxlx.lock
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+*.swp
+
+# Local Claude Code settings
+.claude/settings.local.json
