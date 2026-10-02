@@ -1,6 +1,6 @@
 # Steal a City
 
-Roblox giant + carry/steal tycoon. The full design is the game plan v3
+Roblox giant + carry/steal tycoon. The full design is the game plan v4
 (`steal-a-city-gameplan.md`, keep a copy in this folder). When a rule here and
 the plan disagree, the plan wins; say so instead of guessing.
 
@@ -26,7 +26,10 @@ the plan disagree, the plan wins; say so instead of guessing.
 | `ServerScriptService/Services/*.luau` | one ModuleScript per system with `.Start()` |
 | `ServerScriptService/Packages/` | third-party modules, don't edit |
 | `ReplicatedStorage/Shared/*.luau` | modules both sides use (`Config`) |
-| `StarterPlayerScripts/*.local.luau` | client scripts (LocalScripts) |
+| `StarterPlayerScripts/*.local.luau` | client scripts (LocalScripts); Script Sync does not pick up NEW files here |
+| `ReplicatedStorage/Client/*.client.luau` | client scripts (RunContext Client); put new client scripts here |
+| `ReplicatedStorage/Shared/Signal.luau` | by-reference signal; use it instead of BindableEvents (those copy tables) |
+| `ServerScriptService/Build/*.luau` | edit-time builders (`Kit`, `BuildMap`, `BuildAssets`); run in Studio with `loadstring(B.X.Source)()(Kit)` |
 
 `name.luau` = ModuleScript, `name.server.luau` = Script, `name.local.luau` =
 LocalScript, `name.client.luau` = Script with RunContext Client,
@@ -35,20 +38,25 @@ Scripts in `StarterPlayerScripts` use `.local.luau`: a `.client.luau` Script
 there runs more than once.
 Duplicate names in one folder can't sync.
 
-## Rules (from plan §9)
+## Rules (from plan §14)
 
-- Server is the authority. Pick-up, drop, catch, delivery and theft are
-  validated on the server by distance and state. Never trust a client number.
+- Server is the authority. Pick-up, drop, catch, delivery and Stomp are
+  validated on the server by distance and state; check carry path and speed
+  against Size. Never trust a client number.
 - `Services/Data.luau` is the only writer of saved data. Read with
   `Data.Get(player)`, write with `Data.Update(player, fn)`. Save data, never
-  instances: plot slots are `{id, variant, lockedUntil}`.
-- Size is the only stat. Server sets the Player's `Scale` attribute (1-4x);
-  clients run `Model:ScaleTo`. World is built at about 0.5x.
+  instances: plot slots are `{id, variant}`;
+  safes are `{tier, stage, contents, readyAt}`.
+- Size is the main stat. Server sets the Player's `Scale` attribute (1-4x,
+  eased curve); clients run `Model:ScaleTo`. Speed keeps rising past the 4x
+  visual cap via a separate speed stat. World is built at about 0.5x.
 - Tunable numbers go in `ReplicatedStorage/Shared/Config.luau`.
-- Carrying: the real object stays put; weld a small massless non-colliding
-  proxy to the carrier and record the carry in a server table.
+- Carrying: the real object stays put (aftermath shows); weld a light,
+  non-colliding proxy that keeps the object's silhouette to the carrier and
+  record the carry in a server table. Leaving while carrying returns it.
 - Chasers: Humanoid `MoveTo` every 0.2 s, no pathfinding; catch is a server
-  distance check. Stop at the Giant Gate.
+  distance check with latency tolerance; caught = ragdoll + fling home, the
+  object returns. Stop at the Giant Gate (safe-zone line).
 - Variants are data (material, colour, light, particles), not extra models.
 - Policy: paid random items show odds and are gated with
   `PolicyService:GetPolicyInfoForPlayerAsync` (`ArePaidRandomItemsRestricted`).
@@ -96,6 +104,9 @@ in mock mode and nothing saves between tests.
 
 ## Current milestone
 
-Week 1 (plan §10): greybox Street, 8 plots with an `Owner` attribute, Giant
-Gate, ProfileStore data, plot claim, Scale attribute + client ScaleTo + camera.
-Done when a player can grow in place and their data survives a rejoin.
+Phase 1, core loop (plan §15): new lobby with 8 plots at the start of the road,
+stages 1-2 with their transition, data, plot claim, carry and deliver,
+Size/speed curve, bench press, chaser AI, Stomp, Piggy Bank. Done when the
+owner can play the loop on stages 1-2 and judge carry/chase feel and stage
+length. Parallel work follows plan §15 and `AGENTS.md`: one agent per Studio
+window or Blender instance.

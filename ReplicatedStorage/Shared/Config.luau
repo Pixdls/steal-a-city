@@ -1,48 +1,52 @@
 --!strict
--- Tunable numbers from the game plan (v3). Shared by server and client.
--- Change values here, not inline in systems.
-
-local Config = {}
-
--- Size / scale (plan §4, §9)
-Config.MIN_SCALE = 1
-Config.MAX_SCALE = 4 -- visible avatar scale cap; numeric Size keeps rising past it
-Config.SCALE_TWEEN_TIME = 0.6
-Config.SIZE_AT_MAX_SCALE = 100 -- placeholder curve: Size 1 -> 1x, Size 100+ -> 4x (tune in week 2)
-
--- Plots (plan §3)
-Config.PLOT_COUNT = 8
-Config.MAX_PLAYERS = 8
-
--- Economy (plan §4)
-Config.OFFLINE_CAP_SECONDS = 8 * 60 * 60
-Config.OFFLINE_RATE = 0.5 -- judgement call: "reduced rate" is not specified in the plan
-Config.LONG_NAP_CAP_SECONDS = 24 * 60 * 60
-
--- Theft protection (plan §4)
-Config.SHIELD_UNTIL_SIZE = 10
-Config.JOIN_LOCK_SECONDS = 30
-
--- Onboarding (plan §4, §5)
-Config.NO_CATCH_UNTIL_DELIVERY = 3
-
--- Variants multiply income (plan §4)
-Config.VARIANT_MULTIPLIER = {
-	Normal = 1,
-	Gold = 3,
-	Neon = 5,
-	Frozen = 8,
-	Rainbow = 10,
-	Seasonal = 12,
+local Config = {
+ DATA_STORE_NAME = "PlayerData_v2", START_SIZE = 10, BASE_WALK_SPEED = 16,
+ MIN_SCALE = 1, MAX_SCALE = 4, SIZE_AT_MAX_SCALE = 1e8, SCALE_TWEEN_TIME = 0.6,
+ MAX_SPEED_MULTIPLIER = 8, SPEED_PER_DECADE = 0.25, SLOW_MULTIPLIER = 1.5,
+ BENCH_TIERS = {
+  {cost=0, rate=2}, {cost=500, rate=8}, {cost=15000, rate=30},
+  {cost=250000, rate=120}, {cost=5e6, rate=500}, {cost=120e6, rate=2000},
+  {cost=3e9, rate=8000}, {cost=75e9, rate=30000}, {cost=2e12, rate=120000}, {cost=50e12, rate=500000},
+ },
+ DELIVERY_SECONDS = 120, DELIVERY_MIN_RATIO = 0.25, DELIVERY_MAX_RATIO = 2,
+ CARRY_EXPONENT = 0.5, CARRY_MIN_RATIO = 0.25, CARRY_HEIGHT_RATIO = 1.2,
+ PICKUP_DISTANCE = 10, PICKUP_SIZE_FACTOR = 0.15, PICKUP_MAX_DISTANCE = 22,
+ PICKUP_TOLERANCE = 3, PICKUP_COOLDOWN = 0.5, DROP_RETURN_SECONDS = 20,
+ DROP_GRAB_DELAY = 0.5, DROP_OWNER_DELAY = 2, DROP_RAY_HEIGHT = 12, DROP_RAY_LENGTH = 100,
+ DELIVERY_INTERVAL = 0.1, DELIVERY_Y_TOLERANCE = 10,
+ PATH_SAMPLE_SECONDS = 0.5, PATH_SPEED_TOLERANCE = 1.8, PATH_DISTANCE_TOLERANCE = 12,
+ RESPAWN_MIN_SECONDS = 60, RESPAWN_MAX_SECONDS = 120, RESPAWN_POP_SECONDS = 0.3,
+ START_SLOTS = 8, MAX_SLOTS = 20, SLOT_BASE_COST = 500, SLOT_COST_FACTOR = 10,
+ TROPHY_SIZE = 7, PLOT_COUNT = 8, MAX_PLAYERS = 8,
+ SELL_INCOME_SECONDS = 60, OFFLINE_RATE = 0.3, OFFLINE_CAP_SECONDS = 6*60*60,
+ LONG_NAP_RATE = 0.6, LONG_NAP_CAP_SECONDS = 24*60*60,
+ REBIRTH_BASE_COST = 1e9, REBIRTH_COST_FACTOR = 5, REBIRTH_INCOME = 0.5, REBIRTH_GROWTH = 0.5,
+ CHASER_TICK = 0.2, CHASER_WARNING = 1, CHASER_SPAWN_MIN = 40, CHASER_SPAWN_MAX = 60,
+ CHASER_RUSH_DISTANCE = 25, CHASER_MAX_PER_PLAYER = 3, CHASER_MAX_SERVER = 16,
+ CHASER_CATCH_DISTANCE = 6, CHASER_VELOCITY_TOLERANCE = 0.1, CHASER_MAX_TOLERANCE = 12,
+ CHASER_STUCK_SECONDS = 1.5, CHASER_STUCK_DISTANCE = 1, CHASER_RECOVERY_STEP = 6,
+ CHASER_GATE_WAIT = 2, CHASER_RETURN_TIMEOUT = 20, CHASER_GATE_Z = -4,
+ CHASER_FLING_SPEED = 120, CHASER_FLING_UP = 45, CHASER_RAGDOLL_SECONDS = 2,
+ STOMP_COOLDOWN = 5, STOMP_RANGE = 12, STOMP_CONE_DEGREES = 70, STOMP_WINDUP = 0.25,
+ STOMP_IMMUNITY = 6, STOMP_RAGDOLL_SECONDS = 1.5, STOMP_PROTECTED_DELIVERIES = 2,
+ STOMP_EFFECT_SECONDS = 0.45, STOMP_EFFECT_RADIUS = 6,
+ SAFE_RESPAWN_MIN = 45, SAFE_RESPAWN_MAX = 90, SAFE_VARIANT_BOOST = 2,
+ SAFE_REVEAL_SECONDS = 0.8, SAFE_OPEN_DISTANCE = 12,
+ SAFE_START_PADS = 2, SAFE_MAX_PADS = 6, SAFE_QUEUE = 3,
+ DATA_HEARTBEAT_SECONDS = 30, MAP_WAIT_SECONDS = 10, SPAWN_CLEARANCE = 4, BENCH_DISTANCE = 12,
+ VARIANTS = {
+  {id="Normal", multiplier=1, chance=0.894, color=Color3.new(1,1,1), material=Enum.Material.SmoothPlastic},
+  {id="Gold", multiplier=3, chance=0.08, color=Color3.fromRGB(255,198,45), material=Enum.Material.Metal},
+  {id="Diamond", multiplier=10, chance=0.02, color=Color3.fromRGB(125,233,255), material=Enum.Material.Glass},
+  {id="Neon", multiplier=35, chance=0.005, color=Color3.fromRGB(114,255,99), material=Enum.Material.Neon},
+  {id="Rainbow", multiplier=120, chance=0.001, color=Color3.fromRGB(255,100,240), material=Enum.Material.Neon},
+ },
 }
-
--- Size -> visible scale. Linear placeholder; swap for a curve that feels good.
 function Config.ScaleForSize(size: number): number
-	local t = math.clamp((size - 1) / (Config.SIZE_AT_MAX_SCALE - 1), 0, 1)
-	return Config.MIN_SCALE + (Config.MAX_SCALE - Config.MIN_SCALE) * t
+ local d = math.max(0, math.log10(math.max(size, Config.START_SIZE)/Config.START_SIZE))
+ return math.clamp(1 + 0.5*math.min(d,4) + math.max(0,d-4)/3, Config.MIN_SCALE, Config.MAX_SCALE)
 end
-
--- Data store name. Bump the suffix only to wipe all test data.
-Config.DATA_STORE_NAME = "PlayerData_v1"
-
+function Config.SpeedForSize(size: number): number
+ return math.min(Config.MAX_SPEED_MULTIPLIER, Config.ScaleForSize(size) + Config.SPEED_PER_DECADE*math.max(0,math.log10(math.max(size,1)/Config.SIZE_AT_MAX_SCALE)))
+end
 return Config

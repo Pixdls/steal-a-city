@@ -1,7 +1,7 @@
 --!strict
 -- Applies each player's "Scale" attribute to their character on this client
 -- (plan §9). Every client scales every character, so everyone sees the same
--- giants. For the local player it also scales speed, jump and camera zoom.
+-- giants. For the local player it also scales jump and camera zoom.
 --
 -- Untested starter: verify in Studio during week 1 (check HipHeight at spawn,
 -- and that remote giants don't sink into the ground).
@@ -15,7 +15,6 @@ local Config = require(ReplicatedStorage.Shared.Config)
 
 local localPlayer = Players.LocalPlayer
 
-local BASE_WALK_SPEED = StarterPlayer.CharacterWalkSpeed
 local BASE_JUMP_POWER = StarterPlayer.CharacterJumpPower
 local BASE_MAX_ZOOM = StarterPlayer.CameraMaxZoomDistance
 
@@ -24,8 +23,6 @@ local tweenInfo = TweenInfo.new(Config.SCALE_TWEEN_TIME, Enum.EasingStyle.Back, 
 local function applyLocalStats(character: Model, scale: number)
 	local humanoid = character:FindFirstChildOfClass("Humanoid")
 	if humanoid then
-		-- Empty-handed speed; the carry system will override this while carrying.
-		humanoid.WalkSpeed = BASE_WALK_SPEED * scale
 		humanoid.UseJumpPower = true
 		humanoid.JumpPower = BASE_JUMP_POWER * math.sqrt(scale)
 	end
@@ -42,6 +39,7 @@ local function watchCharacter(player: Player, character: Model)
 		end
 	end)
 
+	local activeTween: Tween? = nil
 	local function onScaleChanged(instant: boolean)
 		local target = player:GetAttribute("Scale")
 		if typeof(target) ~= "number" then
@@ -51,7 +49,9 @@ local function watchCharacter(player: Player, character: Model)
 		if instant then
 			current.Value = target
 		else
-			TweenService:Create(current, tweenInfo, { Value = target }):Play()
+			if activeTween then activeTween:Cancel() end
+			activeTween = TweenService:Create(current, tweenInfo, { Value = target })
+			;(activeTween :: Tween):Play()
 		end
 		if player == localPlayer then
 			applyLocalStats(character, target)
@@ -63,6 +63,7 @@ local function watchCharacter(player: Player, character: Model)
 	end)
 	character.Destroying:Connect(function()
 		connection:Disconnect()
+		if activeTween then activeTween:Cancel() end
 		current:Destroy()
 	end)
 

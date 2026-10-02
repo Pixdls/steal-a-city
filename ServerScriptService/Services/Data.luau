@@ -1,7 +1,5 @@
 --!strict
--- Data: the ONLY module that writes saved player data (plan §9).
--- Other systems read with Data.Get and write with Data.Update.
--- Saves data, never instances: plot slots are {id, variant, lockedUntil}.
+-- Only this service mutates profile data; update callbacks must not yield.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -10,39 +8,35 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local ProfileStore = require(ServerScriptService.Packages.ProfileStore)
 
-export type Slot = {
-	id: string,
-	variant: string,
-	lockedUntil: number,
-}
-
+export type Slot = {id: string, variant: string}
+export type Safe = {tier: string, stage: string, contents: Slot, readyAt: number}
 local TEMPLATE = {
-	Coins = 0,
-	Size = 1,
-	Rebirths = 0, -- integer; multiplier is computed at income time
-	Slots = {} :: { Slot },
-	Collection = {} :: { [string]: { [string]: boolean } }, -- [objectId][variant] = true
-	Deliveries = 0,
-	PlayerThefts = 0, -- successful thefts from other players (ends the shield)
-	LastSeen = 0, -- os.time() at last save, for offline earnings
-	Funnel = {} :: { [string]: boolean }, -- onboarding steps already logged
+ Cash = 0, Size = Config.START_SIZE, Rebirths = 0, BenchLevel = 1,
+ SlotCount = Config.START_SLOTS, SafePads = Config.SAFE_START_PADS,
+ Slots = {} :: {Slot}, Backpack = {} :: {Slot}, Safes = {} :: {Safe},
+ Index = {} :: {[string]: {[string]: boolean}}, Deliveries = 0,
+ LastSeen = 0, Funnel = {} :: {[string]: boolean},
 }
 
 export type PlayerData = typeof(TEMPLATE)
 
-local store = ProfileStore.New(Config.DATA_STORE_NAME, TEMPLATE)
+local store: any = nil
+local started = false
+local Signal = require(ReplicatedStorage.Shared.Signal)
+local changedEvent = Signal.new()
 local profiles: { [Player]: any } = {}
 local offlineSeconds: { [Player]: number } = {}
 
-local loadedEvent = Instance.new("BindableEvent")
+local loadedEvent = Signal.new()
 
 local Data = {}
 
 -- Fires (player, data) once a player's profile is ready.
-Data.Loaded = loadedEvent.Event
+Data.Loaded = loadedEvent
+Data.Changed = changedEvent
 
 -- Attributes mirrored onto the Player so clients and UI can read them.
-local MIRRORED = { "Coins", "Size", "Rebirths" }
+local MIRRORED = { "Cash", "Size", "Rebirths", "BenchLevel", "SlotCount", "SafePads" }
 
 local function mirror(player: Player, data: PlayerData)
 	for _, key in MIRRORED do
@@ -112,6 +106,7 @@ function Data.Update(player: Player, mutate: (data: PlayerData) -> ()): boolean
 	end
 	mutate(profile.Data)
 	mirror(player, profile.Data)
+	changedEvent:Fire(player, profile.Data)
 	return true
 end
 
@@ -123,18 +118,30 @@ function Data.TakeOfflineSeconds(player: Player): number
 	return seconds
 end
 
--- Logs an onboarding funnel step once per player (plan §5).
+-- Logs an onboarding funnel step once per player.
 function Data.LogFunnel(player: Player, step: string)
 	Data.Update(player, function(data)
 		if not data.Funnel[step] then
 			data.Funnel[step] = true
 			print(`[Funnel] {player.UserId} {step}`)
-			-- TODO week 4: send to AnalyticsService:LogFunnelStepEvent
+			-- AnalyticsService integration is deferred; the durable step is recorded here.
 		end
 	end)
 end
 
 function Data.Start()
+ if started then return end
+ started = true
+ store = ProfileStore.New(Config.DATA_STORE_NAME, TEMPLATE)
+ game:BindToClose(function()
+  for player in profiles do onPlayerRemoving(player) end
+ end)
+ task.spawn(function()
+  while started do
+   task.wait(Config.DATA_HEARTBEAT_SECONDS)
+   for player in profiles do Data.Update(player, function(data) data.LastSeen = os.time() end) end
+  end
+ end)
 	for _, player in Players:GetPlayers() do
 		task.spawn(onPlayerAdded, player)
 	end

@@ -1,203 +1,299 @@
-# Steal a City — game plan
+# Steal a City — game plan v4
 
-Version 3, 2026-09-30. Built from live Roblox chart data (26 charts, 964 games), Rolimons player histories, Roblox's official discovery/analytics/policy docs, teardowns of Steal An Egg / Steal a Brainrot / Grow a Garden / Ride A Pet / Keyboard Escape, and four independent reviews (retention, monetisation, technical, and a Codex design pass). Where a claim comes from a source it is marked; where it is a judgement call it says so.
+Version 4, 2026-10-02. The approved final decisions replace v3. Numbers are starting values to tune in playtests. This plan takes precedence where older project instructions disagree.
 
----
+**What changed since v3**
+
+- One road now connects 10 launch stages, with 16 planned, each a city of its era.
+- The lobby is 8 plots beside the road. The Giant Juice and museum stories are gone.
+- A bench press on each plot provides the main growth; deliveries add a growth bump.
+- Safes reveal objects and Secret buildings, with mixed timers and a Secret guarantee counter.
+- Player theft happens through the Stomp on the road. Plots are safehouses.
+- Variants, the Crusher, cash-only rebirth and the Index form the collection economy.
+- The tutorial introduces a bucket, a guaranteed Gold safe reward and a free bench upgrade.
+- Launch purchases and a 7–14 day production plan replace the old monetisation and schedule.
 
 ## 1. The game in one breath
 
-You drank the Giant Juice. The city is your collection now. Carry cones, then cars, then houses, then landmarks home to your plot; everything on display earns coins. The bigger you get, the bigger the things you can lift and the bigger what comes after you. Other giants can raid your plot. Last thing to steal: the Moon.
+Carry the city home. Start with buckets, end with pyramids. Your collection earns cash; your bench makes you grow. The bigger you get, the bigger what you can steal and the faster what chases you. Other players can knock loose what you carry on the road.
 
-**Title:** Steal a City (Codex's pick over "Steal a Skyscraper": it covers cones through landmarks, and version one has no skyscrapers yet). Group name trick from Steal An Egg: name the group "and Carry It Home" so the listing reads "Steal a City — and Carry It Home".
+The name is **Steal a City**; backup: **Steal the World**. Each stage is a city of its era: Cowboy Town, Castle Village, Pharaoh City, Moon City. There is no lore to explain. Steal An Egg is the closest reference, alongside Steal a Brainrot and Grow a Garden. Copy what works and add the giant/city touch.
 
----
+## 2. The map
 
-## 2. Fiction (fixed)
+You spawn on your own plot. The lobby has no plaza or fountain: 8 plots line both sides of the road's start, following Steal An Egg. Each has a bench press. Shop, Footprints/cosmetics, Sell and Crusher sit along the edges. The safe-zone line, the **Giant Gate**, is just past the plots.
 
-The v2 fiction had holes: why deliveries and gym reps both grow you, why a cone earns money, why police chase you on the road but not on your lawn, why other giants can raid but police can't. One fiction that closes all of them, kid-readable:
+Tan cliffs with grass tops and trees enclose everything. The cliff wall is the only backdrop. Everything in front of the cliffs on the road is stealable.
 
-1. You drank the Giant Juice, so every heavy thing you carry home makes you bigger.
-2. Your plot is your Giant Museum: people pay to see what you've taken, so everything on display earns coins, even while you sleep.
-3. The city defends itself, and the bigger the thing you take, the bigger what comes after you: a guard dog, police cars, a helicopter, tanks and jets, a giant robot.
-4. The city's forces stop at the Giant Gate at the edge of Home; only other giants dare come past it.
-5. When you're big enough, you can eat something from your museum to grow even faster, and when you've outgrown the city you Rebirth: start small again with more Giant Juice in your veins.
+Target **10 stages at launch, 16 planned**. Each gets 5 objects: 2 small, 2 medium and 1 showpiece. Objects generally get bigger further along, but later stages still have small objects. Early stages are about 150–200 studs long; later ones get slightly longer. Every showpiece has a 2x-scaled stage chaser guarding it, without a separate boss system.
 
-Everything below follows from these five sentences. The gym is gone (it had no job without hard gates and competed with the core loop, per the retention review). "Eat what you stole" replaces it as the coin-and-duplicate sink.
+| # | Stage / year arch | Road | Objects, small to showpiece | Chaser | Secret building, safes only | Release |
+|---|---|---|---|---|---|---|
+| 1 | Ranch Trail (1880) | Narrow dirt path | Bucket, hay bale, cactus, scarecrow, **covered wagon** | Ranch dog | Cloudmill, floating sails | Launch |
+| 2 | Cowboy Town (1880) | Wide dirt street, wooden boardwalks | Water trough, outhouse, stagecoach, water tower, **saloon** | Sheriff | Haunted Saloon | Launch |
+| 3 | Castle Village (1250) | Cobblestones | Market stall, well, catapult, windmill, **castle tower** | Knight on foot | Dragon Keep | Launch |
+| 4 | Pirate Port (1700) | Wooden docks by water | Cannon, anchor, treasure pile, lighthouse, **pirate ship** | Pirate captain | Ghost Ship | Launch |
+| 5 | Main Street (2026) | Two-lane road | Car, ice-cream truck, house, corner shop, **school** | Officer | Candy House | Launch |
+| 6 | Highway (2026) | Highway | Bus, fire truck, tanker, billboard, **gas station** | Police car | Monster Truck Arena | Launch |
+| 7 | Downtown (2026) | City plaza | Fountain, cinema, apartment block, mall, **Ferris wheel** | SWAT van; helicopter spotlight is spectacle only | Disco Tower | Launch |
+| 8 | Pharaoh City (3000 BC) | Sand road | Obelisk, statue, Sphinx, temple, **pyramid** | Mummy; 2x Mummy at pyramid | Sunstone Sphinx | Launch |
+| 9 | Roman City (100 AD) | Marble road | Chariot, temple, aqueduct, arena gate, **Colosseum** | Gladiator | Vesuvius Temple | Launch |
+| 10 | Frozen Peaks | Snow road | Sled, cabin, ski lift, ice palace, **ice castle** | Yeti | Santa's Workshop | Launch; Christmas hook, first cut if late |
+| 11 | Dino Jungle | Ferns, mud | Fossils, skeletons, **T-Rex skeleton** | T-Rex | tbd | Update |
+| 12 | Skyline | Steel and glass | Crane, tower, **stadium** | Foreman | tbd | Update |
+| 13 | World Wonders | Plaza | Big Ben, Eiffel Tower, **Statue of Liberty** | Museum guard | tbd | Update |
+| 14 | Future City (3000) | Neon glass | Hover car, robot, **megatower** | Robot cop | tbd | Update |
+| 15 | Space Port | Launch platform | Satellite, shuttle, **rocket** | Astronaut | tbd | Update |
+| 16 | Moon City, finale | Moon dust | Rover, lander, **moon base** | Alien | tbd | Update; later “steal the Moon” event |
 
----
+Update-stage object lists are incomplete; the remaining objects are tbd. Keep the existing traffic-cone model as a road prop.
 
-## 3. Map
+Transitions take **30–50 studs**. Surfaces blend, cliffs change colour, and props from both stages mix. Roads widen gradually, never suddenly from one lane to four. A year arch with a recommended-Size sign sits in each transition. No portals or time-travel story.
 
-One road out of Home, districts in a row, buildings on both sides so the walls are the city. Districts get taller, not wider; a new district is one week's build appended to the end.
+The launch route changes as follows:
 
-| District | Objects | Chaser | Version |
-|---|---|---|---|
-| Home | 8 plots, Giant Gate, Feed Machine, Crane pad | none | v1 |
-| Street | cones, bikes, bins, benches, mailboxes | guard dog | v1 |
-| Highway | cars, buses, trucks, food trucks | police cars | v1 |
-| Downtown | houses, shops, fountain, Ferris wheel, statue | SWAT helicopter | v1 |
-| Skyline | towers, stadium, rocket, roller coaster | tanks and jets | week 3 after launch |
-| Landmarks | Eiffel Tower, Pyramids, Big Ben, Colosseum, Statue of Liberty | giant robot | week 6-7 |
-| The Moon | one object, hangs over your plot | — | month 3+ |
+- Ranch Trail → Cowboy Town: path widens into a dusty main street with boardwalks.
+- Cowboy Town → Castle Village: dirt → gravel → cobbles; wood becomes stone.
+- Castle Village → Pirate Port: cobbles descend to the sea and wooden docks.
+- Pirate Port → Main Street: old docks → modern pier → promenade → asphalt.
+- Main Street → Highway: an on-ramp widens two lanes to four.
+- Highway → Downtown: highway exit becomes city boulevard.
+- Downtown → Pharaoh City: sand blows over cracked asphalt into a sand road.
+- Pharaoh City → Roman City: sand becomes white marble.
+- Roman City → Frozen Peaks: marble climbs into a snowy mountain pass.
 
-- Objects respawn 60-120 s after being taken.
-- A **Crane** in Downtown drops a new object on a visible countdown every few minutes; it can roll a variant. This is the rare-spawn moment, with a server-wide announcement.
-- **Rebirth stays on the same map** (sky, palette and season swap, higher multiplier). New cities (Tokyo, Egypt, Moon base) are a month-6 feature, not a week-one promise. Four maps for one builder was the v2 mistake.
+Taking an object leaves a mess until it respawns in **60–120 seconds**, with a new variant roll. Houses leave foundations, broken pipes spraying water, sparking wires and dust. Hydrants leave water jets; lamps leave sparking stumps; cars leave oil, tire marks and alarms. Benches, bins and mailboxes leave bolts and litter; fountains leave dry basins.
 
----
+Aim for about **3 spawn points per player per stage**, then tune so 8 players cannot strip it bare. Variants roll per spawn, not per player.
 
-## 4. Rules
+## 3. Size, speed and carrying
 
-**Size** is the only stat.
-- +Size per delivery, scaled by the object's weight. No gym.
-- **Feed:** put an object from your plot into the Feed Machine to convert it into Size. Sink for duplicates and coins (feeding costs coins).
-- Visible avatar scale: 1x to 4x (the city is built at about half scale so 4x reads as a giant on a phone). Numerical Size keeps rising past that; only reach and speed keep growing.
+Start at **$0 and Size 10**. Size is the main stat and reaches billions. Visible scale runs from **1x to 4x**: fast early growth, increasingly hard progress toward the cap. Speed and strength keep rising after 4x. A **Slow Mode** toggle helps when speed becomes difficult to steer.
 
-**Weight** is the tension.
-- You can pick up anything. Carry speed = your Size versus the object's weight. A Size-5 kid lifts a car and crawls; a Size-40 giant walks off with it.
-- Before you pick up, the prompt shows the expected carry speed and danger ("SLOW · police will catch you"). Weight is a decision, not a surprise (Codex addition).
-- Empty-handed speed grows with Size (giant stride), capped at 3-4x. Out fast, home slow.
+Anything can be lifted. A heavy load causes a strained walk and sweat, with no locks or “Size needed” text. Object weight is roughly the Size a player has when that object is their best. Recommended Size rises about **3x per stage through stages 1–3, then 4x**.
 
-**Chasers** spawn on grab, tiered by the object, and follow you home (fixes the v2 contradiction where district lanes met a kid with a cone in Downtown with a helicopter). They stop at the Giant Gate. Touch = drop + fling + respawn at Home.
-- **No chaser can catch you until your third delivery** (the dog barks and follows). A scripted failure in minute one is the single biggest bounce risk (Roblox's onboarding guidance: deliver the first joyful loop inside 5 minutes; their funnel example lost 70% between step 1 and 2).
-- Every district has a dangerous shortcut and a safer detour so escaping is a skill, not a ratio (Codex).
+`Carry speed = walk speed × clamp((Size / weight)^0.5, 0.25, 1)`
 
-**Player theft** (rewritten after the griefing review):
-- Eligibility is keyed on the **object**, not the thief's Size: any player can lift a tier-N object off a plot whose total value is above a floor. Size brackets keyed on players were trivially gamed with alts.
-- **Only the owner (or their plot guard) can tap a carrier to make them drop it**, and only within a radius of the victim's plot. "Anyone can tap anyone" would have handed the road to griefers, which was Steal a Brainrot's top complaint until its Jan 2026 anti-griefing update.
-- Stolen objects are never destroyed, only moved.
-- **Shield until your first successful theft from another player or until Size 10, whichever is later** (a "first session" shield would expire exactly on the D1 return visit, the session that decides retention).
-- Timed base lock: 30 s on join, on-demand lock bought with coins (+10 s per rebirth), as Steal a Brainrot does.
-- Starter slots are permanent and grow with rebirth. No theft while you're offline.
+This means full speed when weight is at or below Size, and never below **25%** of walk speed.
 
-**Economy**
-- Coins/sec from each displayed object; **variants multiply income** (Gold 3x, Neon 5x, Frozen 8x, Rainbow 10x, seasonal 12x), not just looks. Stacking multipliers are what make Steal a Brainrot's and Grow a Garden's collections matter.
-- Offline earnings capped at 8 hours at a reduced rate.
-- Sinks: plot slots, locks, Feed, Crane summons, rebirth.
-- **Rebirth is gated on coins plus named objects** ("own a Gold Bus and a Ferris Wheel"), the way Steal a Brainrot gates on cash plus two named units. That turns the collection book into the quest log.
-- After being robbed, the game offers a **recovery contract**: a short task that replaces the base object (not the variant). A loss should create a comeback, not an exit.
+The **bench press** is the main growth source, equivalent to Steal An Egg's treadmill. It works while AFK, **online only**. Costs rise roughly 20x and gains roughly 4x between tiers. The tutorial gives the first upgrade free.
 
-**Collection** (day one): index per object and variant, with permanent bonuses at milestones. Plot arrangement: move and rotate your haul with snap placement on mobile.
+| Bench cost | Size gained per second |
+|---|---:|
+| Free | 2 |
+| $500 | 8 |
+| $15K | 30 |
+| $250K | 120 |
+| $5M | 500 |
+| $120M | 2K |
+| $3B | 8K |
+| $75B | 30K |
+| $2T | 120K |
+| $50T | 500K |
 
----
+Bench levels can also be bought with Robux; those levels survive rebirth.
 
-## 5. First two minutes
+`Delivery bump = bench rate × 120 seconds × clamp(weight / Size, 0.25, 2)`
 
-1. Spawn on your plot at Size 1. A cone ten metres away with a big PICK UP prompt and an 11-second timed hint. Carry it home (15 s). It plants, coins tick, you visibly grow.
-2. A bike on a different route. Second delivery, second growth. The dog follows but can't catch.
-3. A Size-40 giant walks past holding a bus. A tower stands on someone's plot in the distance. Goal shown, not told.
-4. Minute two: the Crane countdown hits zero, a Neon fire hydrant drops with a server-wide announcement, and someone races for it.
+A delivery is worth roughly **2 minutes** of bench growth, with more for heavy loads. Group joining gives a one-time Size boost. Global like goals can give everyone a boost, for example at **10K likes**. No individual like/favourite rewards.
 
-Log the onboarding funnel (spawn, first pickup, first plant, first growth, first Highway object) from day one.
+## 4. Economy
 
----
+Use big numbers formatted **K, M, B, T, Qa**. The first object earns **$1/s**. Each stage's best object earns about **7x** the previous stage's best.
 
-## 6. Social and cadence
+Pacing targets: first delivery **0:30**, first bench upgrade **2:00**, **$1M at 25–30 minutes**, billions in a few hours, trillions after a few days. Early useful upgrades should be about **3–6 minutes** of income apart.
 
-- Servers of 6-8.
-- **Landmark event every 15 minutes:** a landmark crash-lands at the far end in pieces; each piece carried home pays everyone a share and shows each player's contribution. This is the co-play reason that isn't robbing each other (co-play days is an algorithm signal).
-- Saturday update at a fixed hour plus a 30-60 minute **Admin Abuse** window before it (Steal An Egg runs this every Saturday 8am PT). The server-wide spawn/boost commands must exist on day one even if the first event is week two.
-- Monthly seasonal variant: Haunted (October), Frozen (December).
-- Like + favourite + group join reward (Steal An Egg gives a big stat boost for all three). Weekly codes tied to the Saturday update.
+| Variant | Income multiplier | Spawn chance | Presentation |
+|---|---:|---:|---|
+| Gold | x3 | 8% | Gold appearance |
+| Diamond | x10 | 2% | Diamond appearance |
+| Neon | x35 | 0.5% | Glow and local light beam |
+| Rainbow | x120 | 0.1% | Server-wide alert |
 
----
+Seasonal variants come later. Secret building variants stop at **Diamond**.
 
-## 7. Monetisation
+Plots start with **8 slots**, rising to **20**. Each purchased +1 slot costs about **10x** the previous one: **$500, $5K, $50K…**. Objects appear at trophy scale in a dense “giant's hoard” pile. Each plot has **1 showcase podium** for its best showpiece or Secret. A full plot triggers a pickup warning; overflow goes into a backpack.
 
-What the comparables actually sell: Steal An Egg has two passes (2x Money 399, 2x Growth Speed 467) and makes the rest on consumables; Steal a Brainrot has 2x Money 299, VIP 375-499, Admin 7,499-9,999, and sells Server Luck (249/999/2,999) and Lucky Blocks; Keyboard Escape sells 44 cosmetic passes from 19 to 2,645 Robux and nothing else. Grow a Garden sells theft itself at 37 Robux.
+**Sell** pays **60 seconds** of the object's income. The **Crusher** turns **3 identical objects into 1 of the next variant**, showing income before and after. The first creation of each gives an Index reward.
 
-**Gamepasses (six, permanent)**
-| Pass | Robux | What |
-|---|---|---|
-| 2x Coins | 299 | the genre's default first buy |
-| 2x Growth | 399 | faster Size gain; one tier, never stackable, never "bigger" |
-| VIP | 399 | +50% coins, tag, gold name, VIP footprints, +2 plot slots |
-| Crane Radar | 249 | map ping when a rare variant or crane drop spawns (Ride A Pet kept exactly this pass and shelved its others) |
-| Long Nap | 349 | 24 h offline earnings instead of 8 h |
-| Mayor's Panel | 4,999 | positive-sum admin: trigger the landmark event, force a rare spawn for the server, change the weather |
+Offline objects earn **30% for up to 6 hours**. Safes continue cracking; the bench stops. Show one small “While you were away: $X” card. The later **Long Nap** pass raises this to **60% for 24 hours**.
 
-**Cosmetic ladder:** giant footprints (glowing, lava, snow), carry trails, stomp sounds, plot skylines, 49 to 1,499 Robux with two flex items at 1,999. Everyone sees the giant, so these are visible from across the map.
+**Rebirth launches with the game.** It requires cash only: **$1B first, x5 each time**, reachable after about **2–3 hours**. It resets cash, objects, Size and cash-bought bench levels. Each rebirth gives **+50% income, +50% growth and +1 slot**. Index progress, cosmetics, passes and Robux bench levels stay.
 
-**Consumables (developer products)**
-- Server Luck 2x/15 min 249, 4x/30 min 799 (buyer announced and thanked).
-- Crane Drop 99: summon the crane now, random object with the variant roll, odds shown.
-- Getaway 29: NPC chasers vanish for 20 s, sold at the moment the jets arrive. NPCs only; never protection from players.
-- Starter Pack 189, one time: coins, a footprint, two Crane Drops.
-- Coin packs 99/499/1,999, never surfaced first.
-- Everything giftable to another player.
+The **Index** rewards each first discovery. All **5 objects** of a stage give a stage stamp, a one-time Size/cash reward and a badge. All variants of a stage give a trail. Secret silhouettes are visible from day one.
 
-**Subscription:** Giant Club, 149 Robux/month: daily Crane Drop, +25% coins, monthly cosmetic.
+## 5. Safes and Secret buildings
 
-**Free:** group join +10% coins; like milestones unlock footprints; weekly codes; a Roblox Plus-only footprint (Plus signups pay the creator a bonus).
+Safes are our equivalent of eggs. Each stage has **1–2 safe spawns**. Stages **1–3** mostly produce Piggy Banks, **4–6** Cash Safes, and **7–10** Armoured safes or Vaults. Ranch Trail never rolls a Vault. Players see era-specific skins and names, such as **Sheriff's Safe** and **Pharaoh's Sarcophagus**; tier names are internal.
 
-**Removed from the draft:** paid base locks (ransom), a permanent Luck pass (pointless next to Server Luck and drags you into per-player odds display), "Giant Hour" (breaks the flex hierarchy), separate plot-slot pass (folded into VIP). Size is never sold.
+**Contents roll at pickup.** Crack-now buys time only.
 
-**Revenue model** (assumptions: DAU ≈ 25x average CCU, 1.5-3 earned Robux per DAU per day, DevEx $0.0038/Robux; under-13 spend per hour is falling platform-wide, so budget on the low column):
+| Tier | Timer | Guaranteed at least | Secret chance |
+|---|---|---|---:|
+| Piggy Bank | 10–30 seconds | An object of that stage | 1% |
+| Cash Safe | 5–15 minutes | Gold variant | 4% |
+| Armoured | 1–3 hours | Diamond variant | 12% |
+| Vault | 8–24 hours | Diamond + 30 minutes of income in cash | 30% |
+| Event safes, post-launch | Up to 48 hours | tbd | tbd |
 
-| Avg CCU | ≈ USD/day |
+Mixed timers give quick rewards and reasons to return. Safes keep cracking offline and are opened by hand. One shared reveal animation swings the door open; a tiny building or object emerges and grows onto the plot.
+
+The safe pad shows **“Secret guaranteed in N safes”** instead of a lucky bar. Piggy Banks do not count; Cash adds **1**, Armoured **3**, Vault **7**. The guarantee is at **25**, subject to tuning.
+
+Start with **2 safe pads**, rising to **6 through cash upgrades**, plus a queue of **3 waiting safes**. Any queued safe can be thrown away. Secrets earn **5x their stage's showpiece**. A carried safe attracts that stage's chasers and can be stomped loose and stolen.
+
+Crack-now launches at roughly **9–199 Robux**, scaling with time left, with odds shown and PolicyService gating. Direct safe sales start **2 weeks after launch**, also with odds and `ArePaidRandomItemsRestricted` gating. Restricted players get disclosed fixed contents.
+
+## 6. Chasers
+
+One shared chase system serves every stage. Their personalities come from sounds, catch animations and idle actions: these are the game's characters.
+
+Chasers get faster in later stages. Within a stage, heavier loads relative to Size bring **1, 2 or 3 chasers**, never faster ones. Maximum **3 per carrier, 16 per server**. Pickup gives a **1-second** siren or bark warning; chasers spawn **40–60 studs** behind you.
+
+A catch returns the object to its spot. You ragdoll, fly far back toward home and get up after about **2 seconds**, with no death screen. Dropping makes chasers return to their posts. Picking up again makes them rush to a fixed distance behind you, then resume normal chase speed. They brake, honk or bark at the Giant Gate and stop. There is never a paid escape button.
+
+## 7. Hitting other players (the Stomp)
+
+Plots are safehouses. The **STOMP** works only on the road, outside the safe zone. Only empty-handed players can use it; only carriers can be hit.
+
+Hotbar slot **1** hits the nearest carrier in a roughly **70° cone**, about **12 studs** ahead. Reach is identical at every Size; only the effect grows. A **0.25-second** foot wind-up and ground shadow warn the victim.
+
+Cooldown is **5 seconds**. A stomped player gets **6 seconds** of immunity and ragdolls for **1.5 seconds**. Nobody can grab the dropped object for **0.5 seconds**; the victim must wait **2 seconds**. Tutorial deliveries are immune. Stomp purchases change appearance only, never power.
+
+Dropping loot also lets a big friend gift it to a small friend. A **Banana Peel** trap comes post-launch. If victims cannot tell who hit them in playtests, fall back to a slap.
+
+## 8. First two minutes
+
+The guided opening runs through about 150 seconds:
+
+1. **0–45 seconds:** spawn on your plot. An arrow and glowing trail lead to a reserved Ranch Trail bucket. “Grab it!” A slow ranch dog follows. Delivery gives a cash pop and big visible growth.
+2. **45–100 seconds:** follow the arrow to a reserved Piggy Bank with a **10-second** timer. Carry it home and place it on a pad. It reveals a guaranteed **Gold** object.
+3. **100–150 seconds:** try something slightly too heavy and crawl. “Get stronger!” points to the bench. The first bench upgrade is free.
+4. Enter free play with a dismissible “next goal” pill.
+
+Hints use at most **4 words**. Show the group-reward prompt at **minute 5**. By **minute 10**, the player should have tried a showpiece.
+
+Log every tutorial step, the **2nd voluntary pickup**, first catch, first Stomp loss, and leaving within **60 seconds** of a loss.
+
+## 9. Screens and controls
+
+Follow Steal An Egg's layout, with thick black outlines, bright colours, chunky stroked text and cartoon icons. Keep the mobile joystick and jump area clear.
+
+| Position | Controls and information |
 |---|---|
-| 5K | $700 - $1,400 |
-| 20K | $2,900 - $5,700 |
-| 100K | $14,000 - $28,500 |
+| Bottom-left | Size with a “+” to buy growth/bench; big green cash below |
+| Left middle | Large Shop and Index buttons; Slow Mode below; Rebirth appears only when affordable |
+| Bottom-centre | Hotbar: Stomp (1), later Banana Peel (2) |
+| Right | Safes with ready-count badge, Daily/Events, boosts |
+| Bottom-right | Next server event countdown, such as “Gold Rush in 12m” |
+| While carrying | Large tap DROP button; PICK UP uses ProximityPrompt |
 
-Creator Rewards (the 2025 replacement for Premium Payouts) add roughly 5% on top, not the 20-50% SEO sites claim.
+Nearby objects alone show nameplates with name, variant and $/s. Plot income uses one combined “+$X” pop.
 
----
+## 10. Events and retention
 
-## 8. Policy
+Launch includes **7 cumulative daily stamps**. Missing a day never resets them; stamp **7** gives a Cash Safe. There are **3 playtime gifts**, at **5, 15 and 30 minutes**.
 
-- **Paid random items** (Server Luck, Crane Drop): numeric odds summing to 100% shown before purchase, some benefit on every outcome, gated with `PolicyService.ArePaidRandomItemsRestricted` (restricted: Brazil under-18, unverified 18+, AU/BE/NL/UK). Give restricted players a fixed-object crane drop instead. Free spawn variants are not paid random items.
-- **No simulated gambling:** no coin wagering, no spin wheels for coins.
-- **Kids/Select:** violence blocks Kids eligibility; "flattened by tanks" stays cartoon and bloodless. A new game is shown only to age-checked 16+ players until it passes the engagement check (sources disagree: 250 vs 500 highly engaged plays in 60 days; expedited review 50,000 vs 100,000 Robux refundable; check the live page before launch).
-- **No watch-to-earn** anywhere (the rule created by Steal An Egg's delisting in August 2026).
+A server event runs every **30 minutes on the clock**, with a visible countdown. **Gold Rush** makes Gold much likelier for **3 minutes**; **Meteor Night** raises Neon chance. Also launch stage badges, **Richest** and **Biggest** leaderboards, the group reward, global like goals and codes for YouTubers.
 
----
+After launch, run a Saturday update with **Admin Abuse**: extra spawns and boosted odds, never free Secrets for the whole server. The scenery crane handles admin drops. Add a stage every **2 weeks**; between stages use a variant event, new Secret, safe skin or Admin Abuse. Frozen Peaks is the Christmas hook; Halloween is missed.
 
-## 9. Technical plan (from the engineering review)
+## 11. Robux
 
-- **Scaling:** server sets a `Scale` attribute (1-4x); each client applies `Model:ScaleTo` locally with a tween (server-side scaling jitters); scale WalkSpeed, JumpPower and `CameraMaxZoomDistance` by the same number; ramps, not stairs; check HipHeight at spawn. World at ~0.5x, avatar capped at 4x.
-- **Carrying:** the real object stays on the map; the server welds a small (0.3-0.5x), massless, non-colliding proxy to the carrier's torso and records the carry in a server table. Pick-up via ProximityPrompt (works on mobile); pick-up, drop, catch and delivery are all server-validated by distance and state. Clipping is accepted (Steal a Brainrot does the same); a hold, not a tap, to drop.
-- **Chasers:** Humanoid rigs looping `MoveTo` between waypoints; on grab, spawn the tiered chaser and `MoveTo` the carrier every 0.2 s; catch is a server distance check. No pathfinding.
-- **Data:** ProfileStore (session locking, autosave, the module AI assistants know best); one Data module owns all writes; offline income from a stored timestamp clamped to the cap; rebirth stored as an integer, multiplier computed at income time.
-- **Plots:** eight plot models with an Owner attribute; save slot data (`{id, variant, lockedUntil}`), never instances; variants as data (material, colour, light, particles), not duplicate models.
-- **Performance:** the risk is carried buildings and 24 plots of towers on a phone, not the avatars; low-poly held proxies, one LOD per slot, MicroProfiler on a cheap Android from week 2, streaming on with plots persistent.
-- **Content:** block landmarks from parts and unions (they read better in miniature than AI meshes), Creator Store meshes for cars and trees, Cube/Meshy only for hero shapes, "wow" from motion and lighting.
-- **Tooling:** Roblox Studio's official MCP server lets Claude Code edit scripts, run playtests and read output inside the open place; no Rojo needed. Studio Server & Clients mode for 8-player tests; Device Simulator plus one real cheap phone weekly.
+| Launch purchase | Robux | What it provides |
+|---|---:|---|
+| 2x Cash | 349 | Doubled cash |
+| 2x Growth | 399 | Doubled growth |
+| +2 Safe Pads | 149 | Additional safe pads |
+| Starter Pack | 99 | Fixed, disclosed contents |
+| Bench tiers | About 799 total for whole line | Bench levels retained through rebirth |
+| Crack-now | 9–199 | Removes remaining wait; price follows time left |
+| Cosmetics | 49–299 | Footprints and Stomp effects |
 
----
+Post-launch: **VIP, Long Nap, Server Luck, cash packs, gifting, direct safe sales and Admin Panel**. Server Luck affects the whole server and shows odds. Remaining contents and prices are tbd.
 
-## 10. Build schedule (one person, AI-assisted scripting)
+Never sell combat power, escape or anything that pays to hurt other players. No pets at launch.
 
-| Week | Build | Milestone |
-|---|---|---|
-| 1 | Greybox Street, 8 plots, Giant Gate. ProfileStore data, plot claim, Scale attribute + client ScaleTo + camera | grow in place, data persists |
-| 2 | Carry system: prompt with carry preview, proxy weld, weight-speed rule, delivery, coin tick | cone-to-plot loop playable; first phone test |
-| 3 | Guard dog chaser (spawn on grab, follow home, Giant Gate stop), catch/drop/fling, respawn timers, no-catch-until-third-delivery; real Street props | the "one more run" test: build one bus, one route, one pursuer and make it excellent before anything else (Codex's "one thing") |
-| 4 | Highway + police cars, Feed Machine, slots and locks shop, offline earnings, shield rules, funnel logging. Server & Clients test with 8 | full economy loop |
-| 5 | Player theft (object-tier eligibility, owner-only tap, locks), variants with multipliers, collection book with milestone bonuses, rebirth (same map, gated on coins + named objects) | meta complete |
-| 6 | Downtown + helicopter, Crane with countdown and announcements, two moving wonders (Ferris wheel, fountain), first-two-minutes polish, sound. Team Test with friends on phones | private test build |
-| 7-8 | Landmark event, admin-abuse commands, monetisation pass (passes + Server Luck + Crane Drop with odds UI + policy gating), recovery contract, performance tuning, Kids/Select prep, icon/thumbnail/trailer clip | launch candidate |
+## 12. Look and sound
 
-**Cut order if behind:** landmark event → collection milestones → Downtown (ship two districts) → player theft (ship PvE with locks stubbed) → variants beyond Gold → offline earnings.
+Use blocky, low-poly shapes with studs/checker textures, saturated colour and clear silhouettes. Give each stage its own palette. Keep particles restrained and camera shake toggleable. Launch with **3 music tracks**.
 
-**Post-launch roadmap:** week 2 Saturday Admin Abuse + daily streak/playtime chest; week 3 Skyline district; week 4 seasonal Haunted variant; week 5-6 leaderboards + private servers; week 6-7 Landmarks; month 3 the Moon; month 6 new cities; trading not before month 3 and only with Roblox's trade-safety work.
+Spend polish time on giant footsteps, the uproot crack, safe reveals, rarity stings, lively Rainbow/Neon variants and small Secret animations.
 
----
+## 13. Policy
 
-## 11. Launch plan
+Paid random items show numeric odds totalling **100%** before purchase, provide a benefit on every outcome, and use `PolicyService:GetPolicyInfoForPlayerAsync` with `ArePaidRandomItemsRestricted`. Apply this to crack-now and later random offers, including Server Luck and direct safe sales. Restricted players receive disclosed fixed contents for direct safe purchases. Free spawn variants are separate from paid random offers.
 
-1. **Soft launch** with the game public but unpromoted; read the onboarding funnel and bounce buckets in Creator Analytics (Acquisition → Home Recommendations shows play-through and the two bounce buckets against a 50th-90th percentile band of similar games).
-2. **Targets:** D1 20%+, D7 6%+, median session 12+ min, 2+ sessions/day. Platform benchmarks (GameAnalytics 2026): D1 median 10.3%, p90 15.9%, p99 22.2%; D7 median 1.6%; session median 9.8 min. If D1 is under 13% after the first 500 organic players, the first two minutes are broken, not the meta.
-3. **Kids/Select:** the algorithm only scores organic Home traffic; ads, friends and search don't count toward ranking but do feed the engagement check. Decide whether to pay the expedited review or grind the 16+ trial.
-4. **Ads:** small daily sponsor budget for 2-3 weeks to feed the engagement check and the funnel, then taper as home recommendations take over (developer folklore, consistent across sources).
-5. **YouTube:** the game must produce one clip that explains itself in three seconds (a tiny kid grabbing a bus and crawling as police arrive; a giant carrying a Ferris wheel past screaming NPCs). Send that clip to mid-size Roblox channels; Foltyn/Caylus historically arrive on their own when a game crosses ~100K (they appear in 7 of 9 breakout stories).
-6. **Cadence from week one:** Saturday update + Admin Abuse + codes, every week, without exception. Every sustainer does this; the decayed games stopped.
+No wagering, simulated gambling, spin-for-coins or watch-to-earn. Keep violence cartoon and bloodless. No individual like/favourite rewards; use global like goals instead.
 
----
+Complete the maturity questionnaire from the actual content. Before publishing, check current Kids/Select eligibility, age-access and engagement-review requirements. V3's conflicting thresholds and regional lists are not launch rules; confirm the live requirements before deciding on an expedited review or organic trial.
 
-## 12. What still isn't proven
+## 14. Technical plan
 
-- Nobody has shipped giant + theft. The bet is that "kid carrying a building" is a stronger video than "kid carrying an egg".
-- Carrying feel on a phone is the make-or-break, and it can only be judged in the week-3 prototype.
-- "A collection of things" versus "a collection of monsters": the moving wonders and named landmarks are the answer, and they are all on the builder.
-- 100K is rare (12 games on the platform today, 3 made this year). This plan aims at the family where it has happened, with the fresh twist that family requires, and every rule in it is there to protect the signals Roblox actually scores.
+The server validates pickup, drop, catch, delivery and Stomp. Check carry paths and speed against Size to prevent teleport and speed exploits; never trust client numbers.
+
+`Services/Data.luau` is the only saved-data writer, using ProfileStore for session locking and autosave. Save data, never instances:
+
+- Plot slot: `{id, variant}`.
+- Safe: `{tier, stage, contents, readyAt}`.
+- Showcase: a slot reference.
+
+Store timestamps for capped offline income and safe completion. Keep rebirth as an integer and calculate its income multiplier when needed.
+
+The server sets the Player's **Scale** attribute from **1x–4x** on an eased curve; clients apply `Model:ScaleTo`. WalkSpeed continues increasing past the visual cap through a separate speed stat. Keep the half-scale world approach, ramps and spawn/camera checks from v3.
+
+The real carried object stays put while aftermath is shown. Weld a lightweight, non-colliding proxy with a recognisable silhouette to the carrier; track ownership in a server table. Leaving while carrying returns the object. Variants are material, colour, light and particle data, not extra models. Put tunable values in `ReplicatedStorage/Shared/Config.luau`.
+
+Chasers use Humanoid `MoveTo` every **0.2 seconds** along the road lane, without pathfinding. After **1.5 seconds** without progress, hop or teleport back to the lane. Catch checks run on the server at about **6 studs**, with latency tolerance.
+
+Build map parts in Studio with `tools/build_map.luau`. Make stealable objects, showpieces, Secrets and chasers through Creator Store kit-bashing and the Blender → FBX pipeline; reserve Blender mainly for showpieces and Secrets where possible. Use streaming and low-poly models. Check carried buildings and dense plots on a cheap phone with the MicroProfiler; use Studio's device simulator and multiplayer tests with **8 players**.
+
+Studio MCP and Script Sync remain the workflow; no Rojo. Test the actual phone controls, saving, purchases and server validation before publishing.
+
+## 15. Production plan and launch
+
+Target launch in **7–14 days**. Codex handles usage-heavy code, Studio building, Blender modelling and documentation; Claude orchestrates and verifies.
+
+Parallel Studio work uses separate scratch places per stage, saved as models/packages and inserted into the main place. Bulk Blender runs headless with `blender -b --python`. Never put two agents in one Studio window or Blender instance.
+
+| Phase | Code lane | Figma lane | Studio map lane | Blender lane | Gate |
+|---|---|---|---|---|---|
+| 0 | Game plan v4 | — | — | — | Owner approves |
+| 1: core loop, days 1–2 | Data, plots, carry, delivery, Size/speed curve, bench, chasers, Stomp, Piggy Bank | HUD and all menus | New lobby; stages 1–2 and transition | 10 objects for stages 1–2; Piggy Bank | Owner tests carry/chase feel and stage length |
+| 2: content, days 3–4 | Safes, variants, Crusher, Index, offline, rebirth; UI from Figma | Icons, thumbnail | Stages 3–10 and transitions | Objects for stages 3–10, showpieces, Secrets, chaser looks | Owner plays everything |
+| 3: extras, day 5 | Onboarding, events, daily rewards, Robux, exploit checks | — | Aftermath and safe-reveal effects | — | — |
+| 4: polish, days 6–7+ | Economy tuning, phone performance, odds UI | — | — | — | Questionnaire, publish |
+
+Target 10 stages. Frozen Peaks is first to cut if late. If stages **3–6** miss schedule, ship **8 stages**: Roman City and Frozen Peaks become the first updates.
+
+Soft launch publicly without promotion first. Read onboarding completion and loss-related exits in Creator Analytics. Use Acquisition → Home Recommendations to inspect play-through and bounce against comparable experiences.
+
+Retain v3's targets: **D1 20%+, D7 6%+, median session 12+ minutes, 2+ sessions/day**. If D1 is below **13% after 500 organic players**, investigate the first two minutes before expanding the meta. These are working targets, not promises.
+
+A/B test icons and thumbnails and make friend joins easy. Keep organic Home results distinct from paid, friend and search traffic when judging discovery. Check current discovery and engagement-review guidance before spending. V3's small daily sponsor test over **2–3 weeks**, then tapering as recommendations grow, remains an approach to test rather than a guaranteed formula.
+
+Capture a clip that explains play in **3 seconds**: a small player crawling with a bus as police arrive, or a giant carrying a Ferris wheel. Use it for mid-size Roblox channels and codes. Follow with Saturday updates and the **2-week stage cadence**.
+
+## 16. Cut list
+
+Do not build:
+
+- Giant Juice lore, museum fiction, Feed Machine or a separate gym. Growth uses the plot bench.
+- Base raids, locks, shields or recovery contracts.
+- Crane countdown, “what's underneath”, headline billboard or crates on visible objects.
+- Pets at launch or a Gloves shop.
+- Paid escape/Getaway or paid combat power.
+- A separate boss system, including a Pharaoh boss; the 2x Mummy covers it.
+- Portals, time-travel story or a floor-by-floor skyscraper.
+- Individual like/favourite rewards or a “most stolen” leaderboard.
+
+The old three-district map, monetisation tables and eight-week schedule are superseded by this plan.
+
+## 17. What still isn't proven
+
+- Does carrying feel good on a phone, including heavy loads and high speed?
+- Can victims clearly see who Stomped them?
+- Do 8 players on one road feel crowded or fun?
+- Can objects without faces carry enough charm? Chasers and Secrets must supply it.
+
+These need playtests. The first owner gate tests carry/chase feel and stage length before the content build expands.
