@@ -118,10 +118,18 @@ return function(Kit, opts)
 	params.RespectCanCollide = false
 	for _, m in Map:GetDescendants() do
 		if m:IsA("Model") and m.PrimaryPart and #m:GetChildren() > 0 then
-			local cf, size = m:GetBoundingBox()
-			local bottom = cf.Position.Y - size.Y / 2
+			local cf = m:GetBoundingBox()
+			local bottom = math.huge -- lowest VISIBLE part; invisible roots sit around the pivot
+			for _, p in m:GetDescendants() do
+				if p:IsA("BasePart") and p.Transparency < 1 then
+					local c, sz = p.CFrame, p.Size -- world AABB half-height of a rotated part
+					local hy = math.abs(c.RightVector.Y) * sz.X / 2 + math.abs(c.UpVector.Y) * sz.Y / 2 + math.abs(c.LookVector.Y) * sz.Z / 2
+					bottom = math.min(bottom, p.Position.Y - hy)
+				end
+			end
+			if bottom == math.huge then continue end
 			params.FilterDescendantsInstances = { m }
-			local hit = workspace:Raycast(Vector3.new(cf.Position.X, bottom + 0.3, cf.Position.Z), Vector3.new(0, -1.3, 0), params)
+			local hit = workspace:Raycast(Vector3.new(cf.Position.X, bottom + 1, cf.Position.Z), Vector3.new(0, -2.5, 0), params)
 			local gap = hit and (bottom - hit.Position.Y) or (bottom > 0.02 and bottom or 0)
 			if gap > 0.02 then
 				local z = Z(zoneOf(m))

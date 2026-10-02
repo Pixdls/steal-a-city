@@ -404,7 +404,7 @@ return function(Kit)
 			local ZE = Z1 + 8 -- the end-wall facade needs the last 8 studs
 			part(St, "Boardwalk", V(24, BW, Z0 - ZE), V(s * (H - 12), BW / 2, (Z0 + ZE) / 2), C.Wood)
 			for z = Z0 - 2, ZE + 2, -2 do -- plank lines
-				Kit.decor(St, "PlankLine", V(24, 0.1, 0.3), V(s * (H - 12), BW + 0.05, z), C.WoodDark, { CastShadow = false })
+				Kit.decor(St, "PlankLine", V(24, 0.05, 0.3), V(s * (H - 12), BW + 0.025, z), C.WoodDark, { CastShadow = false })
 			end
 			Kit.decor(St, "BoardwalkEdge", V(1, BW + 0.3, Z0 - ZE), V(s * (H - 24.5), (BW + 0.3) / 2, (Z0 + ZE) / 2), C.WoodDark)
 			Kit.bound(Bounds, V(2, 400, Z0 - Z1), V(s * (H + 1), 200 + WALL_H, (Z0 + Z1) / 2))
