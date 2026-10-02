@@ -1,6 +1,6 @@
 --!nonstrict
--- Edit-time facade library. Pivot: ground centre of back plane; street: +Z.
--- Run AFTER BuildAssets (which replaces Assets), before the map builder.
+-- Edit-time facade masters. Ground/back-plane origin; street faces +Z.
+-- Run AFTER BuildAssets, which replaces Assets. All dimensions are studs.
 return function(Kit)
 	Kit.ensureStuds()
 	local storage = game:GetService("ReplicatedStorage")
@@ -8,353 +8,375 @@ return function(Kit)
 	local old = assets:FindFirstChild("Facades")
 	if old then old:Destroy() end
 	local facades = Kit.folder("Facades", assets)
-	local V, rgb = Kit.V, Kit.rgb
-	local white, cream = rgb(255, 250, 225), rgb(255, 231, 174)
-	local wood, oak, dark = rgb(159, 83, 32), rgb(218, 146, 62), rgb(83, 43, 27)
-	local red, gold, metal = rgb(211, 43, 43), rgb(255, 191, 36), rgb(87, 107, 121)
-	local black, glass = rgb(29, 29, 38), rgb(65, 166, 203)
-	local green, leaf, pink = rgb(49, 174, 64), rgb(112, 209, 65), rgb(255, 116, 171)
-	local counts = { Lobby = {}, Ranch = {}, Western = {}, Blocker = {} }
-	local total = 0
+	local V, C = Kit.V, Kit.C
+	local counts = { Lobby = {}, Ranch = {}, Western = {}, Transition = {}, Blocker = {} }
+	local total, modules = 0, 0
 
-	-- Decoration is non-colliding by default; only substantial shells/floors opt in.
-	local function part(m, name, x, y, z, sx, sy, sz, color, solid, rotation)
-		return Kit.part(m, name, V(sx, sy, sz), CFrame.new(x, y, z) * (rotation or CFrame.identity), color,
-			{ CanCollide = solid == true, CanTouch = false })
-	end
-	local function cylinder(m, name, x, y, z, height, diameter, color, axis, solid)
-		local rotation = axis == "Z" and CFrame.Angles(0, math.pi / 2, 0)
-			or axis == "X" and CFrame.identity or CFrame.Angles(0, 0, math.pi / 2)
-		local p = part(m, name, x, y, z, height, diameter, diameter, color, solid, rotation)
-		p.Shape = Enum.PartType.Cylinder
-		return p
-	end
-	local function beam(m, name, a, b, thickness, color)
-		return Kit.part(m, name, V(thickness, thickness, (b - a).Magnitude),
-			CFrame.lookAt((a + b) / 2, b), color, { CanCollide = false, CanTouch = false })
-	end
-	local function wedge(m, name, x, y, z, sx, sy, sz, color)
-		local p = Instance.new("WedgePart")
-		p.Name, p.Size, p.CFrame = name, V(sx, sy, sz), CFrame.new(x, y, z)
-		p.Anchored, p.CanCollide, p.CanTouch = true, false, false
-		p.Material, p.MaterialVariant = Enum.Material.Plastic, "Studs"
-		p.TopSurface, p.BottomSurface = Enum.SurfaceType.Smooth, Enum.SurfaceType.Smooth
-		p.Color, p.Parent = color, m
-		return p
+	local function part(m, name, x, y, z, sx, sy, sz, color, solid)
+		local make = solid and Kit.part or Kit.decor
+		return make(m, name, V(sx, sy, sz), V(x, y, z), color)
 	end
 	local function model(name, width, theme, height, color, depth)
 		local m = Kit.model(name, facades)
 		m:SetAttribute("Width", width)
 		m:SetAttribute("Theme", theme)
+		m:SetAttribute("Footprint", V(width, height, depth or 12))
 		m.PrimaryPart = Kit.marker(m, "Root", V(1, 1, 1), V(0, 0, 0))
-		part(m, "BackWall", 0, height / 2, depth / 2, width, height, depth, color, true)
+		part(m, "BackWall", 0, height / 2, 0.75, width, height, 1.5, color, true)
 		return m
 	end
-	local function finish(m)
-		local n = 0
-		for _, p in m:GetDescendants() do
-			if p:IsA("BasePart") then n += 1 end
+	local function sign(m, text, width, y, color, name, z)
+		z = z or 2.1
+		-- Four edge bars, never a plate hidden behind another plate.
+		local plate = part(m, name or "SignPlate", 0, y, z, width, 4, 0.6, color)
+		for _, s in {-1, 1} do
+			part(m, "SignUpright", s * (width / 2 + 0.4), y, z + 0.1, 0.8, 4, 0.8, C.Cream)
+			part(m, "SignBorder", 0, y + s * 2.4, z + 0.1, width + 1.6, 0.8, 0.8, C.Cream)
 		end
-		m:SetAttribute("PartCount", n)
-		total += n
-		table.insert(counts[m:GetAttribute("Theme")], m.Name .. "=" .. n)
+		Kit.label(plate, Enum.NormalId.Back, text, C.Charcoal, 20)
+		return plate
 	end
-	local function sign(m, text, width, y, color)
-		part(m, "SignFrame", 0, y, 5.25, width + 1.6, 7, 1.5, cream)
-		local p = part(m, "SignPlate", 0, y, 6.1, width, 5.5, 0.5, color)
-		Kit.label(p, Enum.NormalId.Back, text, gold, 20)
-		return p
+	local function lantern(m, x, y, z, backing)
+		backing = backing or 1.5
+		-- Bracket touches the wall and the hanger; caps butt against the glow.
+		part(m, "LanternBracket", x, y + 2.6, (backing + z) / 2, 0.4, 0.4, z - backing, C.WoodDark)
+		part(m, "LanternHanger", x, y + 1.95, z, 0.4, 0.9, 0.4, C.Charcoal)
+		Kit.lamp(m, "LanternGlow", V(1.6, 2.2, 1.6), V(x, y, z))
+		for _, s in {-1, 1} do
+			part(m, "LanternCap", x, y + s * 1.3, z, 2, 0.4, 2, C.Charcoal)
+		end
 	end
-	local function lantern(m, x, y, z)
-		part(m, "LanternBracket", x, y + 2.8, z - 0.9, 0.6, 0.6, 2.8, dark)
-		part(m, "LanternGlow", x, y, z, 1.4, 2.3, 1.4, gold)
-		for _, dy in {-1.35, 1.35} do part(m, "LanternCap", x, y + dy, z, 2, 0.5, 2, black) end
-		for _, dx in {-0.8, 0.8} do part(m, "LanternFrame", x + dx, y, z + 0.75, 0.2, 2.3, 0.2, black) end
-	end
-	local function window(m, x, y, z, trim, shutters)
-		part(m, "WindowSurround", x, y, z, 7, 9, 1.2, trim)
-		part(m, "WindowGlass", x, y, z + 0.65, 5.4, 7.3, 0.3, glass)
-		part(m, "Mullion", x, y, z + 0.9, 0.5, 7.4, 0.5, trim)
-		part(m, "Transom", x, y, z + 0.9, 5.5, 0.5, 0.5, trim)
-		part(m, "WindowSill", x, y - 4.3, z + 1, 8, 0.8, 2.5, trim)
+	local function window(m, x, floor, shutters)
+		-- Clear opening: 6 x 8; bottom/sill at floor + 3. Front frame is .6 proud.
+		local y = floor + 7
+		part(m, "WindowGlass", x, y, 1.7, 6, 8, 0.4, C.Sky)
+		for _, s in {-1, 1} do
+			part(m, "WindowJamb", x + s * 3.3, y, 2, 0.6, 8, 1, C.Cream)
+			-- Ground-floor headers merge into the matching porch roof.
+			local trim = floor == 0.6 and s == 1 and C.WoodDark or C.Cream
+			part(m, "WindowHeaderSill", x, y + s * 4.3, 2, 7.2, 0.6, 1, trim)
+		end
+		-- Mullions start at the glass front; their intersections share one colour.
+		part(m, "WindowMullion", x, y, 2.2, 0.4, 8, 0.6, C.Cream)
+		part(m, "WindowTransom", x, y, 2.2, 6, 0.4, 0.6, C.Cream)
 		if shutters then
 			for _, s in {-1, 1} do
-				part(m, "Shutter", x + s * 4.6, y, z + 0.4, 2.2, 8.5, 0.8, shutters)
-				part(m, "ShutterStrap", x + s * 4.6, y - 2.3, z + 0.9, 2.2, 0.6, 0.3, dark)
+				local xx = x + s * 4.85
+				part(m, "WindowShutter", xx, y, 1.9, 2.5, 8, 0.8, shutters)
+				for _, dy in {-2.6, 2.6} do
+					part(m, "ShutterStrap", xx, y + dy, 2.5, 2.5, 0.5, 0.4, C.WoodDark)
+				end
 			end
 		end
 	end
-	local function barrel(m, x, y, z)
-		cylinder(m, "Barrel", x, y + 2.3, z, 4.6, 3.8, wood, "Y", true)
-		for _, h in {0.7, 3.8} do cylinder(m, "BarrelHoop", x, y + h, z, 0.4, 4, metal) end
-		cylinder(m, "BarrelLid", x, y + 4.65, z, 0.2, 3.3, oak)
-	end
-	local function hay(m, x, y, z, width)
-		part(m, "HayBale", x, y + 1.5, z, width, 3, 3.5, gold, true)
+	local function door(m, x, floor, color, prefix)
+		prefix = prefix or "Door"
+		part(m, prefix, x, floor + 4, 1.9, 5, 8, 0.8, color)
 		for _, s in {-1, 1} do
-			part(m, "HayBinding", x + s * width * 0.3, y + 1.5, z + 1.8, 0.35, 3, 0.2, dark)
-			part(m, "HayBindingTop", x + s * width * 0.3, y + 3.05, z, 0.35, 0.2, 3.5, dark)
+			part(m, prefix .. "Jamb", x + s * 2.9, floor + 4, 2.1, 0.8, 8, 1.2, C.Cream)
+		end
+		part(m, prefix .. "Lintel", x, floor + 8.4, 2.1, 6.6, 0.8, 1.2, C.Cream)
+		for _, dx in {-1.25, 0, 1.25} do
+			part(m, prefix .. "PlankJoint", x + dx, floor + 4, 2.4, 0.12, 7.6, 0.2, C.WoodDark)
+		end
+		part(m, prefix .. "Latch", x + 1.8, floor + 3.8, 2.6, 0.4, 0.8, 0.6, C.Gold)
+	end
+	local function hay(m, x, floor, z, width, depth)
+		part(m, "HayBale", x, floor + 1.5, z, width, 3, depth, C.Gold)
+		for _, s in {-1, 1} do
+			part(m, "HayBinding", x + s * width * 0.3, floor + 1.5, z + depth / 2 + 0.1,
+				0.25, 3, 0.2, C.WoodDark)
+			part(m, "HayBindingTop", x + s * width * 0.3, floor + 3.1, z,
+				0.25, 0.2, depth, C.WoodDark)
 		end
 	end
-	local function wheel(m, x, y, z, radius)
-		cylinder(m, "WheelRim", x, y, z, 0.65, radius * 2, dark, "Z")
-		cylinder(m, "WheelInset", x, y, z + 0.36, 0.15, radius * 1.6, oak, "Z")
-		for i = 0, 2 do
-			part(m, "WheelSpokes", x, y, z + 0.52, radius * 1.8, 0.35, 0.25, cream, false, CFrame.Angles(0, 0, i * math.pi / 3))
+	local function barrel(m, x, floor, z)
+		-- Segmented cylinder: hoops replace sections of the barrel, never intersect it.
+		local heights = {0.5, 0.4, 2.2, 0.4, 0.5}
+		local y = floor
+		for i, h in heights do
+			local band = i == 2 or i == 4
+			local p = Kit.decor(m, band and "BarrelHoop" or "BarrelStaves", V(h, 3, 3),
+				CFrame.new(x, y + h / 2, z) * CFrame.Angles(0, 0, math.pi / 2), band and C.Charcoal or C.Wood)
+			p.Shape = Enum.PartType.Cylinder
+			y += h
 		end
-		cylinder(m, "WheelHub", x, y, z + 0.7, 0.4, 0.9, metal, "Z")
 	end
-	local function door(m, x, width, height, z, color, crossed)
-		part(m, "DoorFrame", x, height / 2 + 1, z, width + 2, height + 2, 1.2, cream)
-		part(m, "Door", x, height / 2 + 1, z + 0.7, width, height, 0.8, color)
-		part(m, "DoorSeam", x, height / 2 + 1, z + 1.15, 0.3, height, 0.15, dark)
-		if crossed then
-			for _, s in {-1, 1} do
-				local cx = x + s * width / 4
-				beam(m, "DoorX", V(cx - width / 4 + 0.7, 2, z + 1.3), V(cx + width / 4 - 0.7, height, z + 1.3), 0.75, cream)
-				beam(m, "DoorX", V(cx + width / 4 - 0.7, 2, z + 1.3), V(cx - width / 4 + 0.7, height, z + 1.3), 0.75, cream)
-			end
+	local function wheel(m, x, y, z)
+		local rim = Kit.decor(m, "CartWheelRim", V(0.4, 2.6, 2.6),
+			CFrame.new(x, y, z) * CFrame.Angles(0, math.pi / 2, 0), C.WoodDark)
+		rim.Shape = Enum.PartType.Cylinder
+		part(m, "CartWheelSpoke", x, y, z + 0.35, 2.1, 0.4, 0.3, C.Wood)
+		part(m, "CartWheelSpoke", x, y, z + 0.35, 0.4, 2.1, 0.3, C.Wood)
+		part(m, "CartWheelHub", x, y, z + 0.65, 0.7, 0.7, 0.3, C.Slate)
+	end
+	local function leaf(m, name, x, y, z, sx, sy, sz, color)
+		local p = part(m, name, x, y, z, sx, sy, sz, color or C.Leaf)
+		p.CastShadow = false
+		return p
+	end
+	local function porch(m, w)
+		-- Ten deep: z=1.5..11.5. Deck top is the storey's floor datum (.6).
+		local planks = math.floor(w / 2)
+		for i = 1, planks do
+			part(m, "BoardwalkPlank", -w / 2 + (i - 0.5) * w / planks, 0.3, 6.5,
+				w / planks - 0.08, 0.6, 10, C.Wood, true)
 		end
-		part(m, "DoorLatch", x + 1, height * 0.45, z + 1.4, 0.4, 1.3, 0.5, gold)
+		for _, s in {-1, 1} do
+			local x = s * (w / 2 - 1)
+			part(m, "PorchPost", x, 6.1, 10.7, 1, 11, 1, C.Cream, true)
+			-- Chunky stepped knee brackets meet, rather than pierce, the posts.
+			part(m, "PorchBrace", x - s * 1.25, 10.8, 10.7, 1.5, 1.6, 0.8, C.Wood)
+			part(m, "PorchBraceTip", x - s * 2.5, 11.2, 10.7, 1, 0.8, 0.8, C.Wood)
+		end
+		part(m, "PorchRoof", 0, 12, 6.5, w, 0.8, 10, C.WoodDark, true)
+		part(m, "PorchFascia", 0, 12, 11.7, w, 0.8, 0.4, C.Cream)
+	end
+	local function cornice(m, w, height)
+		part(m, "Cornice", 0, height - 0.6, 2.5, w, 1.2, 2, C.Cream)
+		part(m, "CorniceShadow", 0, height - 1.6, 2, w - 2, 0.8, 1, C.WoodDark)
 	end
 
-	-- Garden walls: clipped hedge masses, deep planters, bright carpentry.
+	-- Hedge fronts are at most six deep, including flowers and lantern caps.
 	for _, spec in {{"LobbyA", 54}, {"LobbyB", 54}, {"LobbyCorner", 30}} do
 		local name, w = spec[1], spec[2]
-		local m = model(name, w, "Lobby", 44, green, 4)
-		part(m, "HedgeFoot", 0, 2, 3, w, 4, 6, leaf, true)
-		for i = 1, 5 do
-			local x = -w / 2 + (i - 0.5) * w / 5
-			part(m, "ClippedCrown", x, 44, 3, w / 5, 4 + i % 2, 6, i % 2 == 0 and leaf or green)
-			part(m, "LeafCluster", x, 9 + i % 3 * 9, 4.3, w / 6, 7, 2, Kit.shade(green, 1 + i % 2 * 0.13))
+		local m = model(name, w, "Lobby", 48, C.GrassDark, 6)
+		part(m, "HedgeBody", 0, 22, 2.25, w, 44, 1.5, C.GrassDark, true)
+		part(m, "HedgeTopBand", 0, 46, 2.25, w, 4, 1.5, C.Grass)
+		-- Leaf tufts lie in a reserved high band, clear of all carpentry.
+		for i = 1, math.floor(w / 7) do
+			leaf(m, "LeafCluster", -w / 2 + 3.5 + (i - 1) * 7, 38 + i % 2,
+				3.7, 5, 4, 1.4)
 		end
-		part(m, "PicketTopRail", 0, 47, 3, w, 0.9, 1, white)
-		for i = 0, math.floor((w - 2) / 4) do
-			part(m, "Picket", -w / 2 + 1 + i * 4, 47, 3, 1, 5, 1, white)
+		for _, side in {-1, 1} do
+			leaf(m, "HedgeFootCluster", side * (w / 2 - 4), 2, 4.1, 6, 4, 2.2)
+			leaf(m, "HedgeFootCrown", side * (w / 2 - 4), 4.6, 4.1, 4, 1.2, 1.8)
+		end
+		-- Window/door assemblies use the same dimensions but mount on the hedge face.
+		local before = #m:GetChildren()
+		if name == "LobbyA" then
+			for _, x in {-13, 13} do window(m, x, 14, C.Wood) end
+		elseif name == "LobbyB" then
+			door(m, -9, 0, C.Wood)
+			window(m, 12, 14, C.Wood)
+		else
+			window(m, 0, 14)
+		end
+		local children = m:GetChildren()
+		for i = before + 1, #children do
+			if children[i]:IsA("BasePart") then children[i].CFrame += V(0, 0, 1.5) end
 		end
 		if name == "LobbyA" then
 			for _, x in {-13, 13} do
-				window(m, x, 25, 4.5, white, oak)
-				part(m, "FlowerBox", x, 19, 6.6, 9, 2.6, 3.6, white, true)
-				part(m, "Soil", x, 20.35, 6.6, 8, 0.3, 2.8, dark)
-				for i = -1, 1 do part(m, "Flowers", x + i * 2.5, 21.2, 6.6, 1.8, 1.5, 1.8, i == 0 and gold or pink) end
+				part(m, "FlowerBox", x, 15.5, 4.2, 8, 1.2, 2.4, C.Cream)
+				for i = -1, 1 do
+					leaf(m, "FlowerLeaves", x + i * 2.4, 16.5, 4.9, 1.6, 0.8, 1.6)
+					leaf(m, "FlowerBloom", x + i * 2.4, 17.15, 4.9, 1.2, 0.5, 1.2, C.Pink)
+				end
 			end
-			lantern(m, 0, 31, 7)
-		elseif name == "LobbyB" then
-			door(m, -9, 11, 23, 4.4, oak, true)
-			part(m, "GateLintel", -9, 27, 5, 16, 2, 5, white)
-			cylinder(m, "RoundWindowFrame", 12, 31, 4.9, 1.5, 10, white, "Z")
-			cylinder(m, "RoundWindow", 12, 31, 5.75, 0.4, 8, glass, "Z")
-			part(m, "RoundWindowCross", 12, 31, 6.1, 0.6, 8, 0.4, white)
-			part(m, "RoundWindowCross", 12, 31, 6.1, 8, 0.6, 0.4, white)
-			for i = 1, 7 do part(m, "ClimbingVine", 21 + math.sin(i) * 2, 4 + i * 4, 5.4, 3, 5, 2.4, leaf) end
-			part(m, "BirdhousePost", 8, 7, 8, 0.8, 14, 0.8, white)
-			part(m, "Birdhouse", 8, 15, 8, 4, 4, 3.5, pink)
-			wedge(m, "BirdhouseRoof", 8, 18, 8, 5, 2, 4.5, red)
-			cylinder(m, "BirdEntrance", 8, 15.5, 9.85, 0.2, 1.5, dark, "Z")
-			part(m, "BirdPerch", 8, 14.3, 10.3, 0.5, 0.5, 1.5, oak)
-		else
-			lantern(m, 0, 25, 7)
-			for i = 1, 12 do part(m, "HedgeTuft", -12 + (i - 1) % 4 * 8, 5 + math.floor((i - 1) / 4) * 8, 5, 5, 4, 3, leaf) end
 		end
-		finish(m)
+		sign(m, name == "LobbyB" and "GARDEN SHED" or "CITY GARDENS", math.min(w - 8, 22), 31, C.Sand, nil, 3.5)
+		lantern(m, name == "LobbyCorner" and 10 or -w / 2 + 4, 10, 4.8, 3)
 	end
 
 	local function barn(name)
-		local m = model(name, 48, "Ranch", 47, red, 4)
-		for i = 0, 11 do part(m, "PlankBatten", -22 + i * 4, 23, 4.3, 0.45, 46, 0.7, Kit.shade(red, 0.8)) end
-		for _, x in {-23, 23} do part(m, "CornerTrim", x, 24, 4.8, 2, 48, 1.5, white) end
-		part(m, "RoofDeck", 0, 48, 3, 48, 2, 6, dark, true)
-		part(m, "RoofRidge", 0, 50, 2, 47, 2, 2, white)
-		for _, x in {-16, 0, 16} do part(m, "RoofSeam", x, 49.2, 4, 0.6, 0.5, 4, metal) end
+		local m = model(name, 48, "Ranch", 48, C.BarnRed)
+		for i = 0, 11 do
+			part(m, "PlankBatten", -22 + i * 4, 33, 1.7, 0.4, 5, 0.4, C.BarnRed)
+		end
+		for _, x in {-23, 23} do part(m, "CornerTrim", x, 22.5, 2.2, 2, 45, 0.6, C.Cream) end
+		cornice(m, 48, 48)
 		return m
 	end
 	do
 		local m = barn("BarnDoors")
-		door(m, 0, 28, 25, 4.7, dark, true)
-		window(m, 0, 38, 4.8, white, oak)
-		part(m, "LoftBeam", 0, 43.5, 7, 1, 1, 6, dark)
-		part(m, "HoistRope", 0, 39, 9.5, 0.25, 8, 0.25, cream)
-		lantern(m, 19, 26, 7)
-		for _, x in {-19, 19} do hay(m, x, 0, 7, 5) end
-		finish(m)
+		door(m, -3.3, 0, C.Wood, "LeftDoor")
+		door(m, 3.3, 0, C.Wood, "RightDoor")
+		window(m, 0, 14, C.Wood)
+		sign(m, "RANCH", 24, 39, C.Sand)
+		for _, x in {-16, 16} do hay(m, x, 0, 5.5, 6, 3.5) end
+		lantern(m, -17, 17, 4)
+		lantern(m, 17, 17, 4)
+		part(m, "HoistBeam", 0, 29, 4.5, 1, 1, 6, C.WoodDark)
+		part(m, "HoistRope", 0, 25, 7, 0.2, 7, 0.2, C.Cream)
 	end
 	do
 		local m = barn("BarnSide")
-		door(m, 0, 12, 10, 4.8, dark, true)
-		-- Elevated hatch and projecting sill expose the golden hay from above.
-		part(m, "LoftFrame", 0, 35, 4.8, 15, 12, 1.5, white)
-		part(m, "LoftOpening", 0, 35, 5.7, 12, 9, 0.5, black)
-		part(m, "LoftSill", 0, 29, 7, 16, 1, 6, oak)
-		hay(m, 0, 29.5, 7.5, 9)
-		for _, x in {-8, 8} do part(m, "OpenHatch", x, 35, 6, 3, 10, 2, red) end
-		wedge(m, "LeanToRoof", 0, 19, 7.5, 42, 4, 8, dark)
-		part(m, "ShedFascia", 0, 17.3, 11, 42, 1.3, 1, white)
-		for _, x in {-19, 19} do part(m, "ShedPost", x, 8.5, 10.5, 1.2, 17, 1.2, oak) end
-		barrel(m, -14, 0, 7.5)
-		barrel(m, -9, 0, 7.5)
-		wheel(m, 13, 4, 7, 3.8)
-		finish(m)
+		porch(m, 44)
+		door(m, 0, 0.6, C.Wood)
+		window(m, 0, 14, C.Wood)
+		sign(m, "HAY & GRAIN", 28, 39, C.Sand)
+		for _, x in {-15, -10} do barrel(m, x, 0.6, 6.5) end
+		hay(m, 13, 0.6, 6.5, 8, 3.5)
+		lantern(m, -17, 18, 4)
 	end
 	do
-		local m = model("Silo", 24, "Ranch", 20, red, 2)
-		cylinder(m, "SiloBody", 0, 24, 6, 46, 11, rgb(174, 187, 187), "Y", true)
-		for _, y in {3, 12, 22, 32, 44} do cylinder(m, "SiloBand", 0, y, 6, 0.65, 11.5, metal) end
-		for i = 0, 4 do cylinder(m, "DomedRoofTier", 0, 47 + i * 1.2, 6, 1.4, 11.6 - i * 1.8, red) end
-		cylinder(m, "Vent", 0, 53, 6, 2, 1.6, metal)
-		cylinder(m, "VentCap", 0, 54.3, 6, 0.6, 2.8, dark)
-		for _, x in {-1.4, 1.4} do part(m, "LadderRail", x, 23, 11.6, 0.3, 44, 0.3, dark) end
-		for i = 1, 18 do part(m, "LadderRung", 0, i * 2.4, 11.6, 3, 0.3, 0.3, metal) end
-		for _, x in {-10, 10} do part(m, "WallPost", x, 10, 2.5, 1, 20, 1, white) end
-		part(m, "WallCap", 0, 20, 2, 24, 1, 3, white)
-		part(m, "GrainChute", 7.8, 4, 5, 4, 3, 3, metal, true)
-		barrel(m, -8.5, 0, 6)
-		finish(m)
-	end
-	do
-		local m = model("Fence", 48, "Ranch", 56, rgb(153, 205, 111), 1)
-		part(m, "LowFieldWall", 0, 10, 2, 48, 20, 2, rgb(114, 180, 80), true)
-		for i = 0, 6 do part(m, "FencePost", -22 + i * 7.3, 8, 4, 1.4, 16, 1.4, white) end
-		for _, y in {5, 12} do part(m, "FenceRail", 0, y, 4, 48, 1.5, 1.4, oak) end
-		part(m, "CartBed", -8, 4, 8, 13, 1, 5, dark, true)
-		for _, z in {5.7, 10.3} do part(m, "CartSide", -8, 6, z, 13, 3, 0.6, oak) end
-		for _, x in {-13, -3} do wheel(m, x, 3, 10.7, 2.3) end
-		hay(m, -10, 6, 8, 5)
-		hay(m, -4, 6, 8, 5)
-		part(m, "CartTongue", 1, 3, 8, 6, 0.7, 0.7, wood)
-		part(m, "PumpPlinth", 16, 0.6, 7, 7, 1.2, 7, metal, true)
-		cylinder(m, "PumpBody", 16, 4.5, 7, 7, 1.8, green)
-		part(m, "PumpSpout", 14.5, 6, 7, 3, 0.8, 0.8, metal)
-		part(m, "SpoutMouth", 13.3, 5.4, 7, 0.8, 1.4, 0.8, metal)
-		beam(m, "PumpHandle", V(16, 8, 7), V(20, 6, 7), 0.6, dark)
-		part(m, "WaterBasin", 12, 1.6, 7, 3, 2, 3, oak)
-		part(m, "BasinWater", 12, 2.65, 7, 2.5, 0.15, 2.5, glass)
-		finish(m)
-	end
-
-	-- Common boardwalk structure; substantial four-stud shells cast deep shadows.
-	local function shop(name, w, h, color, title)
-		local m = model(name, w, "Western", h - 3, color, 4)
-		part(m, "Foundation", 0, 0.6, 5.5, w, 1.2, 11, dark, true)
-		part(m, "Boardwalk", 0, 1.5, 7.5, w, 0.6, 8, oak, true)
-		for i = 1, 6 do part(m, "BoardwalkJoint", -w / 2 + i * w / 7, 1.83, 7.5, 0.16, 0.08, 7.8, dark) end
-		for i = 1, 5 do part(m, "Siding", 0, 5 + i * 5, 4.15, w - 2, 0.35, 0.5, Kit.shade(color, 0.8)) end
-		for _, x in {-w / 2 + 1, w / 2 - 1} do
-			part(m, "CornerPillar", x, (h - 3) / 2, 4.5, 1.8, h - 3, 1.5, cream)
-			part(m, "PorchPost", x, 10, 10.2, 1.2, 17, 1.2, cream)
-			beam(m, "PorchKneeBrace", V(x, 14, 10.2), V(x + (x < 0 and 3 or -3), 18, 10.2), 0.7, oak)
+		local m = model("Silo", 24, "Ranch", 48, C.Slate)
+		-- Block-built silo relief; horizontal courses butt, with bands replacing slices.
+		for i = 0, 5 do
+			part(m, "SiloCourse", 0, i * 7 + 3.1, 4.75, 12, 6.2, 6.5, C.Slate, true)
+			part(m, "SiloBand", 0, i * 7 + 6.6, 4.75, 12, 0.8, 6.5, C.Charcoal)
 		end
-		wedge(m, "PorchRoof", 0, 20, 7.5, w, 3, 8, dark)
-		part(m, "PorchFascia", 0, 18.8, 11.3, w, 1.3, 0.8, oak)
-		part(m, "RoofDeck", 0, h - 4, 2.5, w, 1.2, 5, dark, true)
-		part(m, "FalseFront", 0, h - 5, 4.5, w - 1, 8, 1.5, color)
-		part(m, "Cornice", 0, h - 0.7, 4.5, w, 1.4, 3, cream)
-		for _, x in {-w * 0.3, 0, w * 0.3} do part(m, "CorniceCorbel", x, h - 2.2, 5.3, 1.5, 2, 2, oak) end
-		for _, x in {-w * 0.25, w * 0.25} do part(m, "RoofSeam", x, h - 3.3, 2, 0.6, 0.25, 3.5, metal) end
-		sign(m, title, w - 7, h - 6, dark)
-		return m
+		for i = 0, 2 do
+			part(m, "SiloRoofTier", 0, 42.75 + i * 1.5, 4.75, 13 - i * 3, 1.5, 6.5 - i, C.BarnRed)
+		end
+		part(m, "Vent", 0, 47, 4.75, 1.6, 1, 1.6, C.Slate)
+		part(m, "VentCap", 0, 47.75, 4.75, 2.4, 0.5, 2.4, C.Charcoal)
+		for _, x in {-1.4, 1.4} do part(m, "LadderRail", x, 21, 8.4, 0.4, 42, 0.8, C.WoodDark) end
+		for i = 1, 20 do part(m, "LadderRung", 0, i * 2, 8.6, 2.4, 0.4, 0.4, C.Slate) end
+		for _, x in {-9, 9} do lantern(m, x, 17, 4) end
+		sign(m, "GRAIN", 5, 32, C.Sand, nil, 9.4)
 	end
-	local shops = {
-		{"WestBank", 36, 49, rgb(146, 158, 169), "BANK"},
-		{"WestHotel", 44, 56, rgb(54, 145, 143), "HOTEL"},
-		{"WestStore", 40, 46, rgb(206, 151, 64), "GENERAL STORE"},
-		{"WestJail", 32, 42, rgb(128, 139, 157), "JAIL"},
-		{"WestSheriff", 32, 48, rgb(193, 99, 50), "SHERIFF"},
-		{"WestBlacksmith", 40, 44, rgb(106, 119, 128), "BLACKSMITH"},
-		{"WestBarber", 28, 40, rgb(212, 96, 87), "BARBER"},
-		{"WestStables", 44, 50, rgb(157, 106, 62), "STABLES"},
-	}
-	for _, spec in shops do
-		local name, w, h = spec[1], spec[2], spec[3]
-		local m = shop(name, w, h, spec[4], spec[5])
-		if name == "WestBlacksmith" then
-			-- The shallow back wall stays intact; the open bay projects in front of it.
-			part(m, "OpenBayShadow", 0, 10, 4.35, 29, 16, 0.4, black)
-			part(m, "ForgeHearth", -10, 3.5, 7.2, 7, 4, 5, red, true)
-			part(m, "ForgeCoals", -10, 5.6, 7.2, 5, 0.4, 3, gold)
-			part(m, "ForgeHood", -10, 10, 6, 8, 3, 4, metal)
-			part(m, "Chimney", -10, 28, 2.4, 5, 40, 4.5, red, true)
-			part(m, "ChimneyCap", -10, 48, 2.5, 6, 1, 5, dark)
-			for i = 1, 3 do part(m, "SmokeBlock", -10 + i * 0.7, 48 + i * 2, 3, 2 + i * 0.4, 1.8, 2.5, rgb(174 + i * 14, 181 + i * 12, 185 + i * 10)) end
-			part(m, "AnvilStump", 4, 3.4, 8, 4, 3.2, 4, wood, true)
-			part(m, "AnvilFoot", 4, 5.3, 8, 4, 0.8, 3, metal)
-			part(m, "AnvilWaist", 4, 6.3, 8, 2.3, 1.5, 2, metal)
-			part(m, "AnvilFace", 4, 7.3, 8, 5, 0.8, 2.8, black)
-			wedge(m, "AnvilHorn", 7, 7, 8, 1.5, 1.2, 2.8, metal)
-			barrel(m, 14, 1.8, 7.5)
-		elseif name == "WestStables" then
-			door(m, 0, 27, 16, 4.7, dark, true)
-			window(m, 0, 31, 4.8, cream, red)
-			hay(m, -16, 1.8, 8, 7)
-			hay(m, 16, 1.8, 8, 7)
-			part(m, "HitchingRail", 0, 5.5, 10.8, 21, 0.8, 0.8, oak)
-			for _, x in {-9, 9} do part(m, "HitchingPost", x, 3.8, 10.8, 0.8, 4, 0.8, dark) end
-		else
-			door(m, 0, 6, 13, 4.6, dark, false)
-			for _, x in {-w * 0.29, w * 0.29} do window(m, x, 10, 4.7, cream, name ~= "WestJail" and red or nil) end
-			if name == "WestBank" then
-				for _, x in {-6, 6} do
-					cylinder(m, "StoneColumn", x, 10, 9, 16, 2, cream)
-					for _, y in {2, 18} do part(m, "ColumnCapital", x, y, 9, 3.4, 1.3, 3.4, white) end
-				end
-				part(m, "BankPediment", 0, 33, 5, 26, 2, 2.5, cream)
-			elseif name == "WestHotel" then
-				part(m, "BalconyFloor", 0, 22, 7.5, w - 2, 1, 8, oak, true)
-				for _, x in {-13, 13} do window(m, x, 31, 4.7, cream, nil) end
-				part(m, "BalconyDoor", 0, 29, 4.8, 6, 13, 1, dark)
-				part(m, "BalconyRail", 0, 27, 11, w - 2, 0.8, 0.8, cream)
-				for i = -5, 5 do part(m, "Baluster", i * 3.8, 24.5, 11, 0.5, 4.5, 0.5, cream) end
-				for _, x in {-20, 20} do part(m, "BalconySideRail", x, 27, 7.8, 0.8, 0.8, 6.4, cream) end
-			elseif name == "WestStore" then
-				for _, x in {-15, 15} do barrel(m, x, 1.8, 8) end
-				part(m, "Crate", 9, 3.6, 8, 4, 3.6, 4, oak, true)
-				beam(m, "CrateBrace", V(7.2, 2, 10.1), V(10.8, 5.2, 10.1), 0.5, cream)
-				part(m, "CrateLid", 9, 5.5, 8, 4.2, 0.4, 4.2, wood)
-			elseif name == "WestJail" then
-				for _, x in {-w * 0.29, w * 0.29} do
-					for i = -2, 2 do part(m, "WindowBar", x + i, 10, 5.9, 0.3, 7.5, 0.5, black) end
-				end
-				lantern(m, 0, 27, 7)
-			elseif name == "WestSheriff" then
-				-- Five radial arms give the raised badge a star silhouette.
-				for i = 0, 4 do
-					local a = i * 2 * math.pi / 5
-					part(m, "BadgeStar", math.sin(a) * 1.5, 31 + math.cos(a) * 1.5, 6, 1.1, 3.6, 1.1, gold, false, CFrame.Angles(0, 0, -a))
-				end
-				-- A star on the sign as well as the large carved badge below it.
-				local plate = m:FindFirstChild("SignPlate")
-				plate:FindFirstChildOfClass("SurfaceGui"):FindFirstChildOfClass("TextLabel").Text = "★ SHERIFF ★"
-				lantern(m, 0, 22, 7)
-			elseif name == "WestBarber" then
-				for i = 0, 7 do cylinder(m, "BarberPoleStripe", 9.5, 3 + i * 1.2, 9, 1.2, 1.8, i % 2 == 0 and red or white) end
-				for _, y in {2, 12.2} do cylinder(m, "PoleCap", 9.5, y, 9, 0.8, 2.4, gold) end
+	do
+		local m = model("Fence", 48, "Ranch", 42, C.GrassDark)
+		m:SetAttribute("Footprint", V(48, 48, 12))
+		-- Three 14-high terraces: each ledge steps back 2.5, with no nested volumes.
+		for i, color in {C.GrassDark, C.Grass, C.Leaf} do
+			local front = 8.5 - (i - 1) * 2.5
+			part(m, "HillTerrace" .. i, 0, (i - 0.5) * 14, (1.5 + front) / 2,
+				48, 14, front - 1.5, color, true)
+		end
+		for _, x in {-14, 14} do
+			leaf(m, "HillBush", x, 43.5, 2.5, 6, 3, 2)
+			leaf(m, "HillBushCrown", x, 45.5, 2.5, 4, 1, 1.6)
+		end
+		part(m, "HillTreeTrunk", 0, 44, 2.5, 1.2, 4, 1.2, C.Wood)
+		leaf(m, "HillTreeCrown", 0, 47, 2.5, 6, 2, 2)
+		leaf(m, "HillTreeBranchLeaves", -2.1, 45.3, 2.5, 2.6, 1.4, 1.8)
+		local posts = {-20, -10, 0, 10, 20}
+		for _, x in posts do part(m, "FencePost", x, 2.5, 9.2, 1.4, 5, 1.4, C.Cream, true) end
+		for i = 1, #posts - 1 do
+			for _, y in {1.5, 3.8} do
+				part(m, "FenceRail", (posts[i] + posts[i + 1]) / 2, y, 9.2, 8.6, 0.9, 0.8, C.Wood)
 			end
 		end
-		finish(m)
+		part(m, "CartBed", -8, 2.9, 10.9, 12, 0.6, 2, C.WoodDark)
+		for _, x in {-13, -3} do wheel(m, x, 1.3, 11.1) end
+		part(m, "CartSide", -8, 4, 11.9, 12, 1.6, 0.2, C.Wood)
+		for _, x in {-11, -5} do hay(m, x, 3.2, 10.7, 5, 1.6) end
+		part(m, "CartTongue", 1, 2.9, 10.9, 6, 0.6, 0.6, C.WoodDark)
+		sign(m, "RANCH TRAIL", 18, 20, C.Sand, nil, 6.5)
+		lantern(m, 18, 10, 10.5, 8.5)
+	end
+
+	local shops = {
+		{"WestBank", 36, 46, C.Lilac, "BANK"},
+		{"WestHotel", 44, 48, C.Teal, "HOTEL"},
+		{"WestStore", 40, 44, C.Sand, "GENERAL STORE"},
+		{"WestJail", 32, 42, C.Purple, "JAIL"},
+		{"WestSheriff", 32, 46, C.Orange, "SHERIFF"},
+		{"WestBlacksmith", 40, 44, C.Wood, "BLACKSMITH"},
+		{"WestBarber", 28, 40, C.Pink, "BARBER"},
+		{"WestStables", 44, 48, C.BarnRed, "STABLES"},
+	}
+	for _, spec in shops do
+		local name, w, h, accent, title = table.unpack(spec)
+		local m = model(name, w, "Western", h, accent)
+		porch(m, w)
+		cornice(m, w, h)
+		-- Storey bands and high battens live outside the window/sign rectangles.
+		for _, y in {14, 28.8} do part(m, "StoreyBand", 0, y, 1.9, w, 0.8, 0.8, C.WoodDark) end
+		for _, s in {-1, 1} do
+			part(m, "UpperCornerTrim", s * (w / 2 - 0.5), 20.7, 2, 1, 11.8, 1, C.Cream)
+			part(m, "FalseFrontBatten", s * (w / 2 - 1), h - 8, 1.8, 0.6, 9, 0.6, C.WoodDark)
+		end
+		sign(m, title, w - 8, h - 7, C.WoodDark)
+		if name == "WestStables" then
+			door(m, -3.3, 0.6, C.Wood, "StableLeftDoor")
+			door(m, 3.3, 0.6, C.Wood, "StableRightDoor")
+			for _, x in {-16, 16} do hay(m, x, 0.6, 6, 6, 3) end
+		else
+			door(m, 0, 0.6, C.Wood)
+			for _, x in {-w * 0.29, w * 0.29} do window(m, x, 0.6) end
+		end
+		for _, x in {-w * 0.25, w * 0.25} do window(m, x, 14.6) end
+		lantern(m, 0, 18, 4.5)
+		if name == "WestHotel" then
+			part(m, "BalconyFloor", 0, 14.3, 7, w - 4, 0.6, 7, C.Wood, true)
+			part(m, "BalconyRail", 0, 17.3, 10.2, w - 4, 0.6, 0.6, C.Cream)
+			for i = 0, 9 do
+				part(m, "Baluster", -(w - 5) / 2 + i * (w - 5) / 9, 15.8, 10.2, 0.5, 2.4, 0.5, C.Cream)
+			end
+		elseif name == "WestBank" then
+			for _, x in {-5, 5} do
+				part(m, "ColumnBase", x, 1.1, 7.5, 2, 1, 2, C.Cream)
+				part(m, "StoneColumn", x, 6.1, 7.5, 1.4, 9, 1.4, C.Cream)
+				part(m, "ColumnCapital", x, 11.1, 7.5, 2.4, 1, 2.4, C.Cream)
+			end
+		elseif name == "WestJail" then
+			for _, x in {-w * 0.29, w * 0.29} do
+				for i = -2, 2 do part(m, "WindowBar", x + i, 7.6, 2.75, 0.3, 8, 0.5, C.Charcoal) end
+			end
+		elseif name == "WestSheriff" then
+			part(m, "BadgeVertical", 0, 25.5, 2.2, 1, 4, 0.8, C.Gold)
+			part(m, "BadgeHorizontal", 0, 25.5, 2.2, 4, 1, 0.8, C.Gold)
+		elseif name == "WestBarber" then
+			for i = 0, 7 do
+				part(m, "BarberPoleStripe", 8, 1.1 + i, 7, 1.4, 1, 1.4, i % 2 == 0 and accent or C.Cream)
+			end
+			part(m, "BarberPoleCap", 8, 8.9, 7, 2, 0.6, 2, C.Charcoal)
+		elseif name == "WestStore" then
+			barrel(m, -13, 0.6, 6)
+			part(m, "Crate", 11, 2.1, 6, 3, 3, 3, C.Wood)
+			part(m, "CrateLid", 11, 3.9, 6, 3.4, 0.6, 3.4, C.WoodDark)
+		elseif name == "WestBlacksmith" then
+			part(m, "ForgeHearth", -12, 2.1, 6, 6, 3, 4, C.Slate, true)
+			part(m, "ForgeCoals", -12, 3.8, 6, 4, 0.4, 3, C.Gold)
+			part(m, "ForgeFlue", -12, 7.8, 4.4, 2, 7.6, 0.8, C.Charcoal)
+			part(m, "AnvilStump", 8, 1.85, 6, 3, 2.5, 3, C.Wood)
+			part(m, "AnvilFoot", 8, 3.4, 6, 3, 0.6, 2.5, C.Slate)
+			part(m, "AnvilWaist", 8, 4.1, 6, 1.8, 0.8, 1.8, C.Slate)
+			part(m, "AnvilFace", 8, 4.9, 6, 5, 0.8, 2.5, C.Slate)
+		end
 	end
 
 	do
-		local m = model("EndWall", 120, "Blocker", 56, dark, 4)
+		local m = model("TransitionJog", 10, "Transition", 48, C.Slate)
+		for i = 0, 11 do
+			local split = i % 2 == 0 and -1 or 1
+			for _, span in {{-3.5, split - 0.15}, {split + 0.15, 3.5}} do
+				part(m, "RetainingStone", (span[1] + span[2]) / 2, 1.85 + i * 3.8, 2.4,
+					span[2] - span[1], 3.4, 1.8, C.Slate, true)
+			end
+		end
+		for _, x in {-4.25, 4.25} do part(m, "RetainingPost", x, 23.4, 2.4, 1.5, 46.8, 1.8, C.WoodDark, true) end
+		part(m, "RetainingCap", 0, 47.4, 2.4, 10, 1.2, 1.8, C.Wood, true)
+		sign(m, "TOWN →", 6, 30, C.Sand, nil, 3.7)
+	end
+	do
+		local m = model("EndWall", 120, "Blocker", 48, C.WoodDark)
 		for i = 0, 23 do
-			local x = -57.5 + i * 5
-			part(m, "BarricadeTimber", x, 27, 4.6, 4.6, 54, 1.6, i % 2 == 0 and oak or wood)
+			part(m, "BarricadeTimber", -57.5 + i * 5, 23, 2.1, 4.6, 46, 1.2, C.Wood)
 		end
-		for _, y in {8, 26, 48} do part(m, "CrossRail", 0, y, 6, 120, 2.5, 2, dark) end
-		for _, x in {-48, -24, 0, 24, 48} do
-			beam(m, "DiagonalBrace", V(x - 10, 3, 7.3), V(x + 10, 24, 7.3), 1.3, cream)
-			part(m, "Buttress", x, 10, 8, 3, 20, 6, wood, true)
+		for _, y in {12, 28, 44} do part(m, "CrossRail", 0, y, 3.2, 120, 1.2, 1, C.WoodDark) end
+		part(m, "BarricadeCap", 0, 47, 2.1, 120, 2, 1.2, C.Sand)
+		-- Gate sits on its own forward layer, with two standard five-by-eight leaves.
+		local before = #m:GetChildren()
+		door(m, -3.3, 0, C.Wood, "GateLeftDoor")
+		door(m, 3.3, 0, C.Wood, "GateRightDoor")
+		local children = m:GetChildren()
+		for i = before + 1, #children do
+			if children[i]:IsA("BasePart") then children[i].CFrame += V(0, 0, 1.2) end
 		end
-		local plate = sign(m, "", 76, 37, red)
+		for _, x in {-12, 12} do lantern(m, x, 8, 5, 2.7) end
+		local plate = sign(m, "SIZE", 42, 36, C.Sand, "Sign", 3.3)
 		plate:SetAttribute("MapTextTarget", true)
-		part(m, "BarricadeCap", 0, 55, 4, 120, 2, 6, oak)
-		finish(m)
 	end
 
-	local lines = { "Built ReplicatedStorage.Assets.Facades: 16 modules, " .. total .. " parts (including roots)." }
-	for _, theme in {"Lobby", "Ranch", "Western", "Blocker"} do
+	-- Counts are calculated from the completed masters, including invisible roots.
+	for _, m in facades:GetChildren() do
+		local n = 0
+		for _, p in m:GetDescendants() do if p:IsA("BasePart") then n += 1 end end
+		m:SetAttribute("PartCount", n)
+		total += n
+		modules += 1
+		table.insert(counts[m:GetAttribute("Theme")], m.Name .. "=" .. n)
+	end
+	local lines = {"Built ReplicatedStorage.Assets.Facades: " .. modules .. " modules, " .. total .. " parts (including roots)."}
+	for _, theme in {"Lobby", "Ranch", "Western", "Transition", "Blocker"} do
 		table.insert(lines, theme .. ": " .. table.concat(counts[theme], ", "))
 	end
 	local summary = table.concat(lines, "\n")
-	print(summary) -- Exactly five lines; callers also receive the same summary.
+	print(summary)
 	return summary
 end
