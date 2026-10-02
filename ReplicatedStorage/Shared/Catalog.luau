@@ -17,8 +17,8 @@ add("Stagecoach","Stagecoach","CowboyTown","medium",80,1500,Vector3.new(6,8,11))
 add("WaterTower","Water Tower","CowboyTown","medium",110,3500,Vector3.new(9,20,9))
 add("Saloon","Saloon","CowboyTown","showpiece",150,8000,Vector3.new(22,18,16))
 Catalog.Stages = {
- RanchTrail={id="RanchTrail",index=1,zStart=0,zEnd=-170,halfWidth=34,recommendedSize=10,chaser="RanchDog"},
- CowboyTown={id="CowboyTown",index=2,zStart=-210,zEnd=-400,halfWidth=56,recommendedSize=300,chaser="Sheriff"},
+ RanchTrail={id="RanchTrail",index=1,zStart=0,zEnd=-300,halfWidth=56,recommendedSize=10,chaser="RanchDog"},
+ CowboyTown={id="CowboyTown",index=2,zStart=-340,zEnd=-680,halfWidth=72,recommendedSize=300,chaser="Sheriff"},
 }
 Catalog.Chasers = {RanchDog={stage="RanchTrail",speedMultiplier=0.8},Sheriff={stage="CowboyTown",speedMultiplier=0.9}}
 Catalog.Safes = {PiggyBank={name="Piggy Bank",minSeconds=10,maxSeconds=30,secretChance=0,weightMultiplier=0.6,size=Vector3.new(3,3,3)}}

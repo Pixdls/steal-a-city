@@ -106,6 +106,27 @@ return function(Kit)
 		m:SetAttribute("ObjectId", id)
 		return m
 	end
+	-- Facades (ReplicatedStorage.Assets.Facades): real 3D building fronts placed along a wall line.
+	-- Wall plane is x = at (alongX false) or z = at (alongX true); inward is the side players see.
+	-- names cycle until the span is filled; leftover span stays plain slab.
+	local Facades = game.ReplicatedStorage:FindFirstChild("Assets") and game.ReplicatedStorage.Assets:FindFirstChild("Facades")
+	local function facadeRow(parent, names, a0, a1, at, inward, alongX, startIndex)
+		if not Facades then return end
+		local yaw = alongX and (inward > 0 and 0 or 180) or (inward > 0 and 90 or -90)
+		local pos, i = a0, startIndex or 1
+		while true do
+			local tmpl = Facades:FindFirstChild(names[(i - 1) % #names + 1])
+			if not tmpl then return end
+			local w = tmpl:GetAttribute("Width") or 40
+			if pos + w > a1 + 0.5 then return end
+			local c = tmpl:Clone()
+			local centre = alongX and V(pos + w / 2, 0, at) or V(at, 0, pos + w / 2)
+			c:PivotTo(CFrame.new(centre) * CFrame.Angles(0, math.rad(yaw), 0))
+			c.Parent = parent
+			pos += w
+			i += 1
+		end
+	end
 	-- Market stall, counter facing -Z (toward the gate).
 	local function stall(parent, name, x, z, color, text)
 		local m = Kit.model(name, parent)
@@ -129,8 +150,10 @@ return function(Kit)
 	end
 
 	---------------------------------------------------------------- LOBBY (Home)
-	local LOBBY_X, LOBBY_Z = 100, 262
-	local GATE = 34 -- half-width of the gate opening = Ranch Trail half-width
+	local LOBBY_X, LOBBY_Z = 112, 262
+	local GATE = 40 -- half-width of the gate opening
+	local S1_HALF, S1_END = 56, -300 -- Ranch Trail
+	local S2_HALF, S2_START, S2_END = 72, -340, -680 -- Cowboy Town
 	local Home = Kit.folder("Home", Map)
 	Kit.ground(Home, "Grass", -LOBBY_X, LOBBY_X, 0, LOBBY_Z, GRASS)
 	local path = part(Home, "Path", V(18, 0.3, LOBBY_Z - 40), V(0, 0.1, (LOBBY_Z - 40) / 2), DIRT, { CanCollide = false })
@@ -146,14 +169,8 @@ return function(Kit)
 		part(HomeWalls, "WallCap", V(8, 2, LOBBY_Z + 12), V(s * (LOBBY_X + 3), WALL_H + 1, LOBBY_Z / 2), GRASS)
 		Kit.wall(HomeWalls, "Wall", s > 0 and GATE or -LOBBY_X, s > 0 and LOBBY_X or -GATE, 0, 1, true, WALL_H, HEDGE)
 		Kit.bound(Bounds, V(2, 400, LOBBY_Z), V(s * (LOBBY_X + 1), 200 + WALL_H, LOBBY_Z / 2))
-		-- windows and lanterns between the plots
-		for k = 0, 3 do
-			local zc = 30 + k * 54
-			window(HomeWalls, s * LOBBY_X, -s, false, zc, 26, rgb(64, 150, 70))
-			lantern(HomeWalls, s * LOBBY_X, -s, false, zc + 27, 20)
-		end
-		window(HomeWalls, 0, 1, true, s * 62, 26, rgb(64, 150, 70))
-		door(HomeWalls, 0, 1, true, s * 84, rgb(60, 140, 60))
+		facadeRow(HomeWalls, { "LobbyA", "LobbyB", "LobbyA", "LobbyB", "LobbyCorner" }, 6, LOBBY_Z - 4, s * LOBBY_X, -s, false, s > 0 and 2 or 1)
+		facadeRow(HomeWalls, { "LobbyB" }, s > 0 and GATE + 4 or -LOBBY_X + 4, s > 0 and LOBBY_X - 4 or -GATE - 4, 0, 1, true)
 	end
 	Kit.wall(HomeWalls, "Wall", -LOBBY_X, LOBBY_X, LOBBY_Z, -1, true, WALL_H, rgb(240, 150, 70))
 	part(HomeWalls, "WallCap", V(LOBBY_X * 2 + 12, 2, 8), V(0, WALL_H + 1, LOBBY_Z + 3), GRASS)
@@ -299,72 +316,43 @@ return function(Kit)
 	-- STAGE 1: Ranch Trail (1880). Narrow dirt path through a meadow, red barn walls.
 	local BARN = rgb(190, 62, 52)
 	do
-		local Z0, Z1, H = 0, -170, GATE
+		local Z0, Z1, H = 0, S1_END, S1_HALF
 		local f, spawns, safes, posts = stage("RanchTrail", 1, Z0, Z1, H, 10)
 		Kit.ground(f, "Meadow", -H, H, Z1, Z0, rgb(140, 206, 72))
-		part(f, "Path", V(18, 0.3, Z0 - Z1), V(0, 0.1, (Z0 + Z1) / 2), DIRT, { CanCollide = false, CastShadow = false })
-		for _ = 1, 14 do -- worn edges of the path
+		part(f, "Path", V(24, 0.3, Z0 - Z1), V(0, 0.1, (Z0 + Z1) / 2), DIRT, { CanCollide = false, CastShadow = false })
+		for _ = 1, 24 do -- worn edges of the path
 			local z = rng:NextNumber(Z1 + 6, Z0 - 6)
-			part(f, "PathEdge", V(4, 0.3, rng:NextInteger(6, 14)), V((rng:NextNumber() < 0.5 and -1 or 1) * 10.5, 0.1, z), DIRT, { CanCollide = false, CastShadow = false })
+			part(f, "PathEdge", V(4, 0.3, rng:NextInteger(6, 14)), V((rng:NextNumber() < 0.5 and -1 or 1) * 13.5, 0.1, z), DIRT, { CanCollide = false, CastShadow = false })
 		end
 		sideWalls(f, Z0 - 6, Z1, H, BARN, rgb(96, 70, 60))
 		for _, s in { -1, 1 } do
-			local x, inw = s * H, -s
-			plate(f, "Trim", x, inw, false, (Z0 + Z1) / 2 - 3, WALL_H - 2, Z0 - Z1 - 6, 3, WHITE, 0.8)
-			plate(f, "Trim", x, inw, false, (Z0 + Z1) / 2 - 3, 1.5, Z0 - Z1 - 6, 3, WHITE, 0.8)
-			for z = Z0 - 20, Z1 + 10, -28 do
-				plate(f, "Batten", x, inw, false, z, WALL_H / 2, 2.5, WALL_H, WHITE, 0.8)
-			end
-			for i, z in { -34, -90, -146 } do
-				if (i + (s > 0 and 1 or 0)) % 2 == 0 then
-					-- barn door with X bracing
-					plate(f, "BarnDoor", x, inw, false, z, 10, 18, 20, rgb(150, 44, 40), 0.7)
-					plate(f, "DoorTrim", x, inw, false, z, 20.5, 20, 1.6, WHITE, 1)
-					plate(f, "DoorTrim", x, inw, false, z - 9.2, 10, 1.6, 20, WHITE, 1)
-					plate(f, "DoorTrim", x, inw, false, z + 9.2, 10, 1.6, 20, WHITE, 1)
-					for _, a in { 48, -48 } do
-						local c = x + inw * 0.55
-						part(f, "Brace", V(1.1, 26, 1.6), CFrame.new(c, 10, z) * CFrame.Angles(math.rad(a), 0, 0), WHITE, { CanCollide = false })
-					end
-					window(f, x, inw, false, z, 36)
-				else
-					window(f, x, inw, false, z, 14, rgb(250, 250, 245))
-					plate(f, "HayLoft", x, inw, false, z, 36, 10, 8, rgb(230, 190, 80), 0.9)
-					plate(f, "HayLoftTrim", x, inw, false, z, 40.6, 12, 1.4, WHITE, 1.1)
-				end
-				lantern(f, x, inw, false, z + 14, 18)
-			end
-			-- rail fence hugging the wall
-			for z = Z0 - 12, Z1 + 12, -12 do
-				part(f, "FencePost", V(1.2, 5, 1.2), V(s * (H - 1.6), 2.5, z), DARKWOOD)
-			end
-			for _, y in { 1.8, 3.8 } do
-				part(f, "FenceRail", V(0.7, 0.9, Z0 - Z1 - 24), V(s * (H - 1.6), y, (Z0 + Z1) / 2), WOOD, { CanCollide = false })
-			end
+			facadeRow(f, { "BarnDoors", "Fence", "BarnSide", "Silo", "Fence", "BarnSide", "BarnDoors", "Silo" }, Z1 + 4, Z0 - 10, s * H, -s, false, s > 0 and 3 or 1)
 		end
 		local order = { "Bucket", "HayBale", "Bucket", "HayBale", "Bucket", "Cactus", "Bucket", "HayBale", "Scarecrow", "Bucket", "Cactus", "HayBale",
 			"Bucket", "Scarecrow", "Cactus", "HayBale", "CoveredWagon", "Bucket", "Scarecrow", "Cactus", "HayBale", "Scarecrow", "Cactus", "CoveredWagon" }
-		for i, oid in order do
+		-- the tutorial bucket sits just outside the gate; everything else starts a third of the way in
+		spawnMarker(spawns, "Bucket", 14, 0, -24, 10)
+		for i = 2, #order do
+			local oid = order[i]
 			local s = i % 2 == 0 and -1 or 1
-			local z = -20 - (i - 1) * 6
-			local x = oid == "CoveredWagon" and s * 21 or s * rng:NextInteger(13, 27)
-			if i == 1 then x = 12 end -- the tutorial bucket, right outside the gate
+			local z = -70 - (i - 2) * 10
+			local x = oid == "CoveredWagon" and s * 38 or s * rng:NextInteger(14, 46)
 			spawnMarker(spawns, oid, x, 0, z, oid == "CoveredWagon" and 0 or rng:NextInteger(-25, 25))
 		end
-		Kit.marker(safes, "SafeSpawn", V(2, 1, 2), V(-6, 0, -58))
-		Kit.marker(safes, "SafeSpawn", V(2, 1, 2), V(5, 0, -128))
-		Kit.marker(posts, "ChaserPost", V(2, 1, 2), V(0, 0, -86))
-		Kit.marker(posts, "ChaserPost", V(2, 1, 2), V(-4, 0, -150))
+		Kit.marker(safes, "SafeSpawn", V(2, 1, 2), V(-8, 0, -120))
+		Kit.marker(safes, "SafeSpawn", V(2, 1, 2), V(6, 0, -240))
+		Kit.marker(posts, "ChaserPost", V(2, 1, 2), V(0, 0, -150))
+		Kit.marker(posts, "ChaserPost", V(2, 1, 2), V(-6, 0, -275))
 	end
 
 	-- TRANSITION: the trail widens into the main street; red barn gives way to plank fronts.
 	local TOWN = rgb(204, 160, 104)
 	do
 		local f = Kit.folder("Transition1", Stages)
-		local halves = { 39.5, 45, 50.5, 56 }
-		local prev = GATE
+		local halves = { 60, 64, 68, 72 }
+		local prev = S1_HALF
 		for i, half in halves do
-			local z0 = -170 - (i - 1) * 10
+			local z0 = S1_END - (i - 1) * 10
 			local z1 = z0 - 10
 			local color = i <= 2 and BARN or WOOD
 			sideWalls(f, z0, z1, half, color, i <= 2 and rgb(96, 70, 60) or DARKWOOD)
@@ -373,80 +361,50 @@ return function(Kit)
 			end
 			local ground = i <= 2 and rgb(140, 206, 72) or TOWN
 			Kit.ground(f, "Ground", -half, half, z1, z0, ground, 2)
-			local pathHalf = 9 + i * 5.25
+			local pathHalf = 12 + i * 8.5
 			part(f, "Path", V(pathHalf * 2, 0.3, 10), V(0, 0.1, (z0 + z1) / 2), i <= 2 and DIRT or TOWN, { CanCollide = false, CastShadow = false })
 			prev = half
 		end
-		arch(f, -190, 45 + 4, "COWBOY TOWN  ·  1880", "SIZE 300+", rgb(150, 96, 60)).Name = "YearArch"
+		arch(f, S1_END - 20, 64 + 4, "COWBOY TOWN  ·  1880", "SIZE 300+", rgb(150, 96, 60)).Name = "YearArch"
 	end
 
 	-- STAGE 2: Cowboy Town (1880). Wide dirt street, boardwalks, false-front shops as walls.
 	do
-		local Z0, Z1, H = -210, -400, 56
+		local Z0, Z1, H = S2_START, S2_END, S2_HALF
 		local f, spawns, safes, posts = stage("CowboyTown", 2, Z0, Z1, H, 300)
 		Kit.ground(f, "Street", -H, H, Z1, Z0, TOWN)
 		local BW = 0.6 -- boardwalk height
 		for _, s in { -1, 1 } do
-			part(f, "Boardwalk", V(26, BW, Z0 - Z1), V(s * 43, BW / 2, (Z0 + Z1) / 2), WOOD)
-			part(f, "BoardwalkEdge", V(1, BW + 0.3, Z0 - Z1), V(s * 30.5, (BW + 0.3) / 2, (Z0 + Z1) / 2), DARKWOOD, { CanCollide = false })
+			part(f, "Boardwalk", V(26, BW, Z0 - Z1), V(s * (H - 13), BW / 2, (Z0 + Z1) / 2), WOOD)
+			part(f, "BoardwalkEdge", V(1, BW + 0.3, Z0 - Z1), V(s * (H - 25.5), (BW + 0.3) / 2, (Z0 + Z1) / 2), DARKWOOD, { CanCollide = false })
 			Kit.bound(Bounds, V(2, 400, Z0 - Z1), V(s * (H + 1), 200 + WALL_H, (Z0 + Z1) / 2))
-			-- false fronts: one facade per shop along the wall
-			local fronts = { rgb(214, 172, 110), rgb(150, 98, 62), rgb(92, 168, 156), rgb(206, 92, 70), rgb(232, 214, 160), rgb(120, 140, 190) }
-			local names = s < 0 and { "BANK", "HOTEL", "GENERAL STORE", "BARBER", "JAIL", "TELEGRAPH" }
-				or { "SHERIFF", "BLACKSMITH", "DENTIST", "STABLES", "BAKERY", "POST OFFICE" }
-			local z = Z0
-			local i = 0
-			while z > Z1 + 1 do
-				i += 1
-				local w = math.min(rng:NextInteger(26, 36), z - Z1)
-				if z - w - Z1 < 14 then w = z - Z1 end
-				local h = rng:NextInteger(38, WALL_H)
-				local color = fronts[(i + (s > 0 and 2 or 0) - 1) % #fronts + 1]
-				local x, inw, mid = s * H, -s, z - w / 2
-				Kit.wall(f, "Front", z - w, z, x, inw, false, h, color)
-				part(f, "FrontCap", V(8, 2, w), V(s * (H + 3), h + 1, mid), DARKWOOD)
-				plate(f, "Cornice", x, inw, false, mid, h - 1.5, w, 3, Kit.shade(color, 0.75), 1.2)
-				plate(f, "Corner", x, inw, false, z - 0.8, h / 2, 1.6, h, Kit.shade(color, 0.75), 0.9)
-				sign(f, x, inw, false, mid, 27, math.min(w - 6, 24), 5, names[(i - 1) % #names + 1], rgb(250, 240, 210), rgb(90, 50, 30))
-				door(f, x, inw, false, mid, Kit.shade(color, 0.6), rgb(250, 240, 210))
-				if w >= 30 then
-					window(f, x, inw, false, mid - 9.5, 8)
-					window(f, x, inw, false, mid + 9.5, 8)
-				end
-				window(f, x, inw, false, mid, 37.5 > h - 8 and h - 10 or 37)
-				-- porch roof over the boardwalk
-				part(f, "Porch", V(9, 0.8, w - 2), CFrame.new(s * (H - 4.3), 17.5, mid) * CFrame.Angles(0, 0, math.rad(s * 10)), Kit.shade(color, 0.6), { CanCollide = false })
-				for _, dz in { -w / 2 + 2, w / 2 - 2 } do
-					part(f, "PorchPost", V(1, 16.5, 1), V(s * (H - 8), BW + 8.25, mid + dz), rgb(250, 240, 210))
-				end
-				lantern(f, x, inw, false, mid + 5.5, 14)
-				z -= w
-			end
+			facadeRow(f, { "WestBank", "WestHotel", "WestStore", "WestJail", "WestSheriff", "WestBlacksmith", "WestBarber", "WestStables" }, Z1 + 4, Z0 - 4, s * H, -s, false, s > 0 and 5 or 1)
 		end
 		-- wagon ruts down the street
-		for _, x in { -6, 6 } do
+		for _, x in { -9, 9 } do
 			part(f, "Rut", V(1.4, 0.3, Z0 - Z1 - 8), V(x, 0.1, (Z0 + Z1) / 2), Kit.shade(TOWN, 0.85), { CanCollide = false, CastShadow = false })
 		end
 		local order = { "WaterTrough", "Outhouse", "WaterTrough", "Stagecoach", "Outhouse", "WaterTrough", "WaterTower", "WaterTrough", "Outhouse", "Stagecoach", "WaterTrough",
 			"Saloon", "Outhouse", "WaterTrough", "WaterTower", "Stagecoach", "Outhouse", "WaterTrough", "Outhouse", "Stagecoach", "WaterTower", "Saloon" }
-		local band = { WaterTrough = 33, Outhouse = 36.5, Stagecoach = 16, WaterTower = 45.5, Saloon = 45.5 }
+		local band = { WaterTrough = H - 27, Outhouse = H - 24, Stagecoach = 20, WaterTower = H - 20, Saloon = H - 20 }
 		for i, oid in order do
 			local s = i % 2 == 0 and -1 or 1
-			local z = -224 - (i - 1) * 8
+			local z = Z0 - 24 - (i - 1) * 14
 			local x = s * band[oid]
-			local y = math.abs(x) > 30 and BW or 0
+			local y = math.abs(x) > H - 26 and BW or 0
 			local yaw = (oid == "Stagecoach") and 0 or (s > 0 and 90 or -90) -- fronts face the street
 			spawnMarker(spawns, oid, x, y, z, yaw)
 		end
-		Kit.marker(safes, "SafeSpawn", V(2, 1, 2), V(-8, 0, -270))
-		Kit.marker(safes, "SafeSpawn", V(2, 1, 2), V(9, 0, -352))
-		Kit.marker(posts, "ChaserPost", V(2, 1, 2), V(0, 0, -300))
-		Kit.marker(posts, "ChaserPost", V(2, 1, 2), V(-10, 0, -378))
-		Kit.marker(posts, "ChaserPost", V(2, 1, 2), V(10, 0, -384))
+		Kit.marker(safes, "SafeSpawn", V(2, 1, 2), V(-8, 0, Z0 - 110))
+		Kit.marker(safes, "SafeSpawn", V(2, 1, 2), V(9, 0, Z0 - 260))
+		Kit.marker(posts, "ChaserPost", V(2, 1, 2), V(0, 0, Z0 - 170))
+		Kit.marker(posts, "ChaserPost", V(2, 1, 2), V(-12, 0, Z1 + 30))
+		Kit.marker(posts, "ChaserPost", V(2, 1, 2), V(12, 0, Z1 + 24))
 		-- end of the road for now
 		Kit.wall(f, "EndWall", -H - 6, H + 6, Z1, 1, true, WALL_H, rgb(150, 150, 160))
-		sign(f, Z1, 1, true, 0, 30, 70, 12, "CASTLE VILLAGE  ·  1250", rgb(60, 70, 110))
-		sign(f, Z1, 1, true, 0, 18, 40, 7, "COMING SOON", GOLD, rgb(40, 44, 60))
+		facadeRow(f, { "EndWall" }, -60, 60, Z1, 1, true)
+		sign(f, Z1 + 12.5, 1, true, 0, 30, 70, 12, "CASTLE VILLAGE  ·  1250", rgb(60, 70, 110))
+		sign(f, Z1 + 12.5, 1, true, 0, 18, 40, 7, "COMING SOON", GOLD, rgb(40, 44, 60))
 		Kit.bound(Bounds, V(H * 2, 400, 2), V(0, 200 + WALL_H, Z1 - 1))
 	end
 

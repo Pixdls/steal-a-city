@@ -72,11 +72,17 @@ function Carry.Pickup(player: Player, handle: WorldObjects.Handle): boolean
  if hooks then hooks.prepare(player,handle) end
  local proxy = WorldObjects.CreateModel(handle.id,handle.variant)
  local size = proxy:GetExtentsSize(); local largest = math.max(size.X,size.Y,size.Z)
- local height = character:GetExtentsSize().Y*Config.ScaleForSize(data.Size)
- if largest > 0 then proxy:ScaleTo(proxy:GetScale()*height*Config.CARRY_HEIGHT_RATIO/largest) end
+ local scale = Config.ScaleForSize(data.Size)
+ local height = Config.CHARACTER_HEIGHT*scale -- body height without hats
+ if largest > 0 then
+  -- Keep the object's real size; only shrink giants to fit overhead and grow tiny things enough to read.
+  local factor = math.min(1,height*Config.CARRY_MAX_RATIO/largest)
+  if largest*factor < height*Config.CARRY_MIN_SIZE_RATIO then factor = height*Config.CARRY_MIN_SIZE_RATIO/largest end
+  proxy:ScaleTo(proxy:GetScale()*factor)
+ end
  local primary = proxy.PrimaryPart
  if not primary then proxy:Destroy(); WorldObjects.Return(handle); return false end
- proxy:PivotTo(root.CFrame*CFrame.new(0,height*0.65,0)); proxy.Parent = workspace.Live
+ proxy:PivotTo(root.CFrame*CFrame.new(0,Config.CARRY_HOLD_HEIGHT*scale,0)); proxy.Parent = workspace.Live
  for _, part in proxy:GetDescendants() do
   if part:IsA("BasePart") then
    part.Anchored = false; part.Massless = true; part.CanCollide = false; part.CanQuery = false; part.CanTouch = false
