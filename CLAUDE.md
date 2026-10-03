@@ -104,9 +104,4 @@ in mock mode and nothing saves between tests.
 
 ## Current milestone
 
-Phase 1, core loop (plan §15): new lobby with 8 plots at the start of the road,
-stages 1-2 with their transition, data, plot claim, carry and deliver,
-Size/speed curve, bench press, chaser AI, Stomp, Piggy Bank. Done when the
-owner can play the loop on stages 1-2 and judge carry/chase feel and stage
-length. Parallel work follows plan §15 and `AGENTS.md`: one agent per Studio
-window or Blender instance.
+Open-lobby rebuild and custom prompts (plan file /Users/Work/.claude/plans/pasted-content-id-05d1-decisions-update-wise-dijkstra.md). Checkpoints 1-4 need owner approval.

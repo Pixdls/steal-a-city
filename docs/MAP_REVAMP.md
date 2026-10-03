@@ -122,6 +122,50 @@ Variants (Gold, Neon, Rainbow) and UI are outside this table.
 - Signage: every facade has a sign plate; every station a sign; arches name the stage and year.
 - Lighting: a lantern every 24-30 studs, all with PointLights.
 
+## 3b. Scale table (added 2026-10-03, owner approval required before rebuilding)
+
+Reference: a 1x R15 player is 5.0 studs from feet to head top (hats excluded); knee 1.4,
+hip 2.3, chest 3.5, eye 4.5. At 4x the same player is 20 studs tall. The world is built at
+about half scale (plan v4 §14): a real saloon is ~9 m wide, which would be 32+ studs at full
+scale; ours is 22. Rule for stealables: nothing smaller than knee-to-hip height (1.4-2.3) on
+its shortest readable axis, and the small tier should reach the hip or waist so it never
+reads as foot-sized. Carried proxies keep real size up to 1.3x the player's height.
+
+| Object | Current (W x H x D) | Proposed | At 1x player | At 4x player | Why |
+|---|---|---|---|---|---|
+| Bucket (S1 small) | 2 x 2 x 2 | **3 x 2.6 x 3**, handle 0.5 thick | knee-to-hip, two hands wide | a cup | was foot-sized |
+| Hay Bale (S1 small) | 4 x 3 x 3 | 4.5 x 3 x 3.5 | hip height, chest wide | a brick | fine, slightly wider |
+| Cactus (S1 medium) | 3 x 7 x 3 | 3.5 x 7.5 x 3.5, arms 1.2 thick | taller than the player | waist | fine |
+| Scarecrow (S1 medium) | 4 x 8 x 2 | 5 x 8.5 x 2 | taller than the player, arms wide | hip | fine |
+| Covered Wagon (S1 showpiece) | 7 x 8 x 12 | 8 x 9 x 13, wheels 4 | roof above the head, two players long | knee-high toy | fine |
+| Water Trough (S2 small) | 6 x 2.5 x 3 | 6 x 2.8 x 3 | hip height, player-long | ankle | ok as a small |
+| Outhouse (S2 small) | 4 x 8 x 4 | 4.5 x 9 x 4.5 | a door you'd walk into | hip | fine |
+| Stagecoach (S2 medium) | 6 x 8 x 11 | 7 x 9 x 12 | roof above the head | knee | fine |
+| Water Tower (S2 medium) | 9 x 20 x 9 | 10 x 22 x 10 | 4 players tall | just above the head | fine |
+| Saloon (S2 showpiece) | 22 x 18 x 16 | 24 x 20 x 18 | 2 storeys you'd walk into, door 5 x 8 | waist | the showpiece reads as a building |
+| Piggy Bank (safe) | 3.6 x 4.1 x 5.1 | 3.5 x 3.5 x 4.5 | hip | ankle | fine |
+
+Lobby layout (owner decision 2026-10-03, final and approved at checkpoint 1): **7 plots, 7 players per server**. Five plots along the back cliff have 60 x 50 floors, 12-stud gaps and a total width of 348; entrances face the gate. One 50 x 60 plot on each side sits in the front half, entrances facing each other toward the centre. Every entrance has a 36-deep apron outside the floor for its bench press and upgrade sign. Reserve 40 behind every plot for planned expansion: behind the back row, toward the side cliffs for the side plots.
+
+The lobby interior is 570 x 274, the open centre 318 x 116. Side apron to back-row apron: 18; side plot to stall row: 38. The 88-wide Giant Gate is centred on the front edge, Shop and Footprints left, Sell and Crusher right; the safe-zone line has a SAFE ZONE decal and shield icons. Spawn-to-gate walks across the open centre to the nearest gate edge are P1 217, P2 193, P3 190, P4 193, P5 217, P6 190, P7 190 studs, all within the 190–280 target. This approved layout supersedes the older lobby placement below.
+
+Lobby pieces (built for the 1x player; giants simply tower over them):
+| Piece | Size | Note |
+|---|---|---|
+| Plot | 60 x 50 back-row floor, 50 x 60 side floor, 20 slots, showcase podium 10 x 10 | a trophy is 6-7 studs: hip-to-head height at 1x |
+| Bench press | 8 x 6 x 6, bar at 4.5, seat at 2 | a player lies on it |
+| Upgrade sign | board 8 x 4 on a 7 post, two price badges | like the reference treadmill sign |
+| Stall | 16 x 17 x 10 with 11-tall posts, counter 4 | the clerk stands behind the counter |
+| Giant Gate arch | 88 wide, beam at 44-54 | giants at 4x (20 tall) pass under with room |
+| Walls / cliffs | 48 tall | 2.4x a maxed giant, so nobody sees over |
+| Plot fence | posts 1.4 x 5, rails 0.9 | hip-high |
+| Lantern post | 11 tall | lamp above head height |
+| Lobby open centre | 318 x 116 | 7 plots face the centre |
+
+Stage corridors: Ranch Trail 112 wide x 300 long with a 24 path; Cowboy Town 144 x 340 with a
+92 street and 24 boardwalks. A 4x giant (20 tall, ~8 wide) carrying a saloon (24 wide) fits
+with 60 studs to spare.
+
 ## 4. Zone-by-zone build plan
 
 Zones: **Lobby**, **Ranch Trail**, **Transition**, **Cowboy Town**. (The end wall belongs to Cowboy Town.)
@@ -169,4 +213,39 @@ each logged in this file under "Cycle log".
 6. Review Loop until pass. Then commit, publish.
 
 ## Cycle log
-(empty)
+
+### Cycle 1 (2026-10-03): extended audit + master sweep
+Audit extended: oriented bounding boxes for every part (rotated, wedge, cylinder, ball, mesh),
+a disconnected-parts check (any visible part not touching the rest of its model within 0.1),
+and a scale check against an `ExpectedSize` attribute. Re-running it on the dressed map raised
+the error count from 0 to 660. The props sheet (every master beside a 5.5-stud R15 dummy,
+`workspace.PropsSheet`) was screenshotted in sections.
+
+**Broken, incomplete or wrongly scaled assets found (owner saw 2, sweep found 24):**
+
+| # | Asset | Problem | Fix |
+|---|---|---|---|
+| 1 | Props/HayCart | reads as half a wagon: 2 wheels, no axle, no shafts, no sides, bed too short | rebuild: 4 wheels on 2 axles, bed with side rails, shafts, hay on top |
+| 2 | Props/WagonWheel | placed "leaning" against nothing; spokes clip the hub (3 overlaps) | lean only when a wall/cart is behind it; hub as one cylinder, spokes end at the hub face |
+| 3 | Objects/Bucket (2 studs) | reads as foot-sized next to the dummy; handle thinner than 0.4 | 2.6 x 2.4 x 2.6 with a 0.5 handle; it stays the first, lightest pickup |
+| 4 | All 16 facade signs | the sign board and its 2 uprights touch nothing: they hang in front of the facade | signs become hanging boards on 2 chains from a bracket, or post-mounted boards whose posts stand on the porch; connected by construction |
+| 5 | Facade WestHotel balcony | floor, rail and 10 balusters disconnected from the wall | balcony floor cantilevered from the wall with 2 brackets |
+| 6 | Facade WestSheriff badge | star badge floats in front of the sign | mount on the sign plate |
+| 7 | Facade BarnDoors hay loft | 2 hay bales + 8 bindings float at the loft hatch | hay sits on the loft shelf |
+| 8 | Objects/CoveredWagon | tongue, yoke, driver seat and seat back disconnected | attach to the bed |
+| 9 | Objects/Stagecoach | 2 lanterns, driver seat and back disconnected | attach to the body |
+| 10 | Objects/WaterTower | legs, braces, platform, ladder and tank planks disconnected from the tank (37 loose parts) | tank sits on the platform, legs touch the platform, ladder rungs touch the rails |
+| 11 | Props/WaterPump | bucket floats under the spout | bucket on the ground touching the base |
+| 12 | Props/BenchPress | seat and 2 legs disconnected | legs touch the seat |
+| 13 | Lobby Crusher | sign and light float | mount on the body |
+| 14 | Foliage/GrassTuft1-3 | blades don't touch each other (2-4 loose each) | blades share a base block |
+| 15 | Foliage/Bush1-2 | lobes overlap the canopy by up to 2.5 studs (16 overlaps) | lobes butt against the canopy |
+| 16 | Foliage/Flower* | petals overlap the centre | petals around the centre, not through it |
+| 17 | Foliage/DryShrub1-2 | leaves overlap the stem | leaves attached to stem ends |
+| 18 | Props/Barrel | 4.5 tall vs spec 4 (lid rim sits above the top) | rim inset |
+| 19 | Props/LanternPost | arm + lantern extend 4.2 wide; lantern hangs 0.4 below its hook | hook touches lantern |
+| 20 | Props/Signpost | board 6 wide looks small for a 9.5 post; text later renders as a black blob (your screenshot) | board 8 x 4 with a 0.6 frame, text at 10 px/stud |
+| 21 | Lobby stall Shop/Sell/Footprints | awning slats intersect the posts and sign trims (23 overlaps) | slats start inside the post line |
+| 22 | Objects/Saloon | sign text never renders (label face is wrong side) | fix label face |
+| 23 | Plot fences | a fence line was shared between neighbours, so the plot's own fence is missing on one side | each plot owns its fence; neighbours' fences offset 1 stud |
+| 24 | Scale check | no master had an ExpectedSize yet, so scale was unverified | every builder sets `ExpectedSize`; audit flags +-25% |

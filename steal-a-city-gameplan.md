@@ -1,17 +1,25 @@
-# Steal a City — game plan v4
+# Steal a City — game plan v4.1
 
-Version 4, 2026-10-02. The approved final decisions replace v3. Numbers are starting values to tune in playtests. This plan takes precedence where older project instructions disagree.
+Version 4.1, 2026-10-03. The approved final decisions replace v3. Numbers are starting values to tune in playtests. This plan takes precedence where older project instructions disagree.
 
 **What changed since v3**
 
 - One road now connects 10 launch stages, with 16 planned, each a city of its era.
-- The lobby is 8 plots beside the road. The Giant Juice and museum stories are gone.
-- A bench press on each plot provides the main growth; deliveries add a growth bump.
+- The lobby is 7 plots beside the road. The Giant Juice and museum stories are gone.
+- A bench press in front of each plot provides the main growth; deliveries add a growth bump.
 - Safes reveal objects and Secret buildings, with mixed timers and a Secret guarantee counter.
 - Player theft happens through the Stomp on the road. Plots are safehouses.
 - Variants, the Crusher, cash-only rebirth and the Index form the collection economy.
 - The tutorial introduces a bucket, a guaranteed Gold safe reward and a free bench upgrade.
 - Launch purchases and a 7–14 day production plan replace the old monetisation and schedule.
+
+**What changed in 4.1**
+
+- Lobby: 7 plots (5 back, 1 each side), 7-player servers.
+- An open lobby replaces the corridor, with plot aprons and space reserved for planned expansions.
+- Benches stand outside plots, scale with their owners and have 10 distinct visual tiers.
+- Custom interaction prompts and upgrade signs get owner-approved mockups; first delivery targets about 35 seconds.
+- Claude designs and builds; Codex repeats approved designs, with separate reviewers and four owner checkpoints.
 
 ## 1. The game in one breath
 
@@ -21,9 +29,19 @@ The name is **Steal a City**; backup: **Steal the World**. Each stage is a city 
 
 ## 2. The map
 
-You spawn on your own plot. The lobby has no plaza or fountain: 8 plots line both sides of the road's start, following Steal An Egg. Each has a bench press. Shop, Footprints/cosmetics, Sell and Crusher sit along the edges. The safe-zone line, the **Giant Gate**, is just past the plots.
+You spawn on your own plot. The lobby is an open lobby built for a **1x player**, with **7 plots facing an open centre, 7 players per server**. Cliffs are the only walls: tan/orange stud cliffs in 2–3 tones, stepped grass overhang and voxel trees, with nothing mounted on walls. Everything in front of the cliffs on the road is stealable.
 
-Tan cliffs with grass tops and trees enclose everything. The cliff wall is the only backdrop. Everything in front of the cliffs on the road is stealable.
+Layout is **final, approved at checkpoint 1** (owner decision 2026-10-03): **5 plots along the back cliff**, with **60 x 50-stud floors**, **12-stud gaps** and a total width of **348 studs**, entrances facing the gate. **1 plot on the left and 1 on the right** sit in the front half of the lobby, each **50 x 60 studs**, entrances facing each other toward the centre.
+
+Every plot has a **36-stud-deep apron** in front of its entrance, holding its bench press and upgrade sign **outside the plot floor**. Reserve **40 studs behind every plot** for the planned plot-expansion feature: behind the back row and toward the side cliffs for the side plots.
+
+The **Giant Gate** is centred on the front edge, **88 studs wide**. Shop and Footprints sit left of it; Sell and Crusher sit right of it. These are stalls with striped awnings, coloured ground rings and billboard text. The safe-zone line has a **SAFE ZONE** decal and shield icons.
+
+The lobby interior is **570 x 274 studs**, with an **open centre of 318 x 116**. Leave **18 studs** between the side aprons and back-row apron, and **38 studs** between the side plots and stall row.
+
+Walks from spawn across the open centre to the nearest gate edge: **P1 217, P2 193, P3 190, P4 193, P5 217, P6 190, P7 190 studs**. All are within the **190–280-stud target**.
+
+**Plot expansions (planned, not built):** players buy more space behind their plot for buildings.
 
 Target **10 stages at launch, 16 planned**. Each gets 5 objects: 2 small, 2 medium and 1 showpiece. Objects generally get bigger further along, but later stages still have small objects. Early stages are about 150–200 studs long; later ones get slightly longer. Every showpiece has a 2x-scaled stage chaser guarding it, without a separate boss system.
 
@@ -64,7 +82,7 @@ The launch route changes as follows:
 
 Taking an object leaves a mess until it respawns in **60–120 seconds**, with a new variant roll. Houses leave foundations, broken pipes spraying water, sparking wires and dust. Hydrants leave water jets; lamps leave sparking stumps; cars leave oil, tire marks and alarms. Benches, bins and mailboxes leave bolts and litter; fountains leave dry basins.
 
-Aim for about **3 spawn points per player per stage**, then tune so 8 players cannot strip it bare. Variants roll per spawn, not per player.
+Aim for about **3 spawn points per player per stage**, tuned so 7 players cannot strip it bare. Variants roll per spawn, not per player.
 
 ## 3. Size, speed and carrying
 
@@ -77,6 +95,10 @@ Anything can be lifted. A heavy load causes a strained walk and sweat, with no l
 This means full speed when weight is at or below Size, and never below **25%** of walk speed.
 
 The **bench press** is the main growth source, equivalent to Steal An Egg's treadmill. It works while AFK, **online only**. Costs rise roughly 20x and gains roughly 4x between tiers. The tutorial gives the first upgrade free.
+
+The bench press stands in front of the plot, not on it, and scales with its owner's visible **Scale** (owner decision 2026-10-03; alternatives if a 4x bench hides the trophy pile: scale only while in use, cap at 2x, place beside the plot; to be decided at checkpoint 4).
+
+Tier 1 is a rusty, broken-down bench built in Blender in stud style. There are **10 visual tiers**, never reusing the object-variant looks (no gold/neon/diamond/rainbow). Progression is to be approved at checkpoint 3.
 
 | Bench cost | Size gained per second |
 |---|---:|
@@ -148,7 +170,7 @@ Crack-now launches at roughly **9–199 Robux**, scaling with time left, with od
 
 One shared chase system serves every stage. Their personalities come from sounds, catch animations and idle actions: these are the game's characters.
 
-Chasers get faster in later stages. Within a stage, heavier loads relative to Size bring **1, 2 or 3 chasers**, never faster ones. Maximum **3 per carrier, 16 per server**. Pickup gives a **1-second** siren or bark warning; chasers spawn **40–60 studs** behind you.
+Chasers get faster in later stages. Within a stage, heavier loads relative to Size bring **1, 2 or 3 chasers**, never faster ones. Maximum **3 per carrier, 16 per server**, revisit in the **7-player playtest**. Pickup gives a **1-second** siren or bark warning; chasers spawn **40–60 studs** behind you.
 
 A catch returns the object to its spot. You ragdoll, fly far back toward home and get up after about **2 seconds**, with no death screen. Dropping makes chasers return to their posts. Picking up again makes them rush to a fixed distance behind you, then resume normal chase speed. They brake, honk or bark at the Giant Gate and stop. There is never a paid escape button.
 
@@ -163,6 +185,8 @@ Cooldown is **5 seconds**. A stomped player gets **6 seconds** of immunity and r
 Dropping loot also lets a big friend gift it to a small friend. A **Banana Peel** trap comes post-launch. If victims cannot tell who hit them in playtests, fall back to a slap.
 
 ## 8. First two minutes
+
+Measured target: first delivery about **35 s** with the open lobby (bucket **12 studs past the gate**); accepted for now, re-measured each playtest.
 
 The guided opening runs through about 150 seconds:
 
@@ -189,6 +213,18 @@ Follow Steal An Egg's layout, with thick black outlines, bright colours, chunky 
 | While carrying | Large tap DROP button; PICK UP uses ProximityPrompt |
 
 Nearby objects alone show nameplates with name, variant and $/s. Plot income uses one combined “+$X” pop.
+
+### Interaction prompts
+
+Every ProximityPrompt uses **Style = Custom** with our own chunky UI: thick outlines, stroked text, palette colours and mobile-readable sizing.
+
+The pick-up prompt shows object name, variant in its colour, $/s, a key cap or tap button, a hold ring when hold > 0, and a sweat icon for objects heavier than the player's Size (never a lock or “Size needed”).
+
+Use **Lift/Get off** on the bench, **Upgrade** on the sign (its own **E** prompt; **F** stays Stomp), **Open** on safes, and stall prompts.
+
+Prompt ranges scale with the player: a **BaseDistance** attribute per prompt; the client sets **MaxActivationDistance = BaseDistance x own Scale**; the server validates distance on **Triggered**.
+
+Upgrade signs are studded wooden boards on posts with **“Level X > Y”**, **“Upgrade:”** and a cash badge (SurfaceGui). Mockups are approved at checkpoint 2.
 
 ## 10. Events and retention
 
@@ -246,15 +282,30 @@ The real carried object stays put while aftermath is shown. Weld a lightweight, 
 
 Chasers use Humanoid `MoveTo` every **0.2 seconds** along the road lane, without pathfinding. After **1.5 seconds** without progress, hop or teleport back to the lane. Catch checks run on the server at about **6 studs**, with latency tolerance.
 
-Build map parts in Studio with `tools/build_map.luau`. Make stealable objects, showpieces, Secrets and chasers through Creator Store kit-bashing and the Blender → FBX pipeline; reserve Blender mainly for showpieces and Secrets where possible. Use streaming and low-poly models. Check carried buildings and dense plots on a cheap phone with the MicroProfiler; use Studio's device simulator and multiplayer tests with **8 players**.
+Build map parts in Studio with `tools/build_map.luau`. Make stealable objects, showpieces, Secrets and chasers through Creator Store kit-bashing and the Blender → FBX pipeline; reserve Blender mainly for showpieces and Secrets where possible. Use streaming and low-poly models. Check carried buildings and dense plots on a cheap phone with the MicroProfiler; use Studio's device simulator and a Server & Clients test with **7 players**.
 
 Studio MCP and Script Sync remain the workflow; no Rojo. Test the actual phone controls, saving, purchases and server validation before publishing.
 
 ## 15. Production plan and launch
 
-Target launch in **7–14 days**. Codex handles usage-heavy code, Studio building, Blender modelling and documentation; Claude orchestrates and verifies.
+Target launch in **7–14 days**.
 
-Parallel Studio work uses separate scratch places per stage, saved as models/packages and inserted into the main place. Bulk Blender runs headless with `blender -b --python`. Never put two agents in one Studio window or Blender instance.
+Server size is set to 7 in Game Settings > Places (owner sets it; it is read-only from scripts).
+
+Claude builds and designs: lobby, cliffs, shops, custom prompt UI and the first working prompt of each type, bench press v1 in Blender and the tier progression, showpieces, Secrets, and carry/chase/Stomp feel.
+
+Codex via Orca repeats approved designs only: placing bench + sign on all plots, applying the prompt style everywhere after the first, foliage and prop scatter with approved masters, batch Blender exports/imports/variant recolours, props sheets and screenshot sets, audit extensions, docs and game-plan updates. **Codex never invents designs.**
+
+Reviewers are separate from builders: a fresh Claude agent reviews visuals against the reference screenshots and scores; a Codex run reviews code (server validation, exploits, performance). **Nobody reviews their own work.**
+
+Never two agents in one Studio window or Blender instance; use scratch places per task, inserted as models/packages. Every report names which agent did what. The game plan is updated after every checkpoint.
+
+Owner approval checkpoints:
+
+1. Lobby mockup.
+2. Prompt UI mockups.
+3. Bench tier progression.
+4. Bench props sheet.
 
 | Phase | Code lane | Figma lane | Studio map lane | Blender lane | Gate |
 |---|---|---|---|---|---|
@@ -293,7 +344,7 @@ The old three-district map, monetisation tables and eight-week schedule are supe
 
 - Does carrying feel good on a phone, including heavy loads and high speed?
 - Can victims clearly see who Stomped them?
-- Do 8 players on one road feel crowded or fun?
+- Do 7 players on one road feel crowded or fun?
 - Can objects without faces carry enough charm? Chasers and Secrets must supply it.
 
 These need playtests. The first owner gate tests carry/chase feel and stage length before the content build expands.
